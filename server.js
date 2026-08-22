@@ -488,7 +488,10 @@ app.use("/api", (req, res) => {
    START SERVER
 ========================================== */
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`AURA V9 ONLINE`);
+    console.log(`Server running on port ${PORT}`);
+});
     console.log("=================================");
     console.log("        AURA V9 ONLINE");
     console.log("=================================");
