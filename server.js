@@ -489,9 +489,6 @@ app.use("/api", (req, res) => {
 ========================================== */
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`AURA V9 ONLINE`);
-    console.log(`Server running on port ${PORT}`);
-});
     console.log("=================================");
     console.log("        AURA V9 ONLINE");
     console.log("=================================");
@@ -502,6 +499,6 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log("User Profiles: Persistent");
     console.log("Image Generation: Removed");
     console.log("Video Generation: Removed");
-    console.log(`Server: http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
     console.log("=================================");
 });
