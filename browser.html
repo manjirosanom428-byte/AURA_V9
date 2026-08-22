@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AURA Browser</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #0b0b12;
+    color: white;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.browser {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 62px;
+    background: #12121b;
+    border-bottom: 1px solid #292936;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #70ff9b;
+    padding: 0 10px;
+}
+
+button {
+    border: none;
+    background: #242438;
+    color: white;
+    border-radius: 9px;
+    padding: 9px 12px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #33334d;
+}
+
+.address {
+    flex: 1;
+    height: 40px;
+    background: #1b1b27;
+    border: 1px solid #343447;
+    border-radius: 20px;
+    color: white;
+    padding: 0 18px;
+    outline: none;
+    font-size: 14px;
+}
+
+.address:focus {
+    border-color: #70ff9b;
+}
+
+.content {
+    flex: 1;
+    background: #0b0b12;
+}
+</style>
+</head>
+
+<body>
+
+<div class="browser">
+
+    <div class="topbar">
+
+        <div class="logo">
+            AURA
+        </div>
+
+        <button onclick="goBack()">◀</button>
+
+        <button onclick="goForward()">▶</button>
+
+        <button onclick="reloadPage()">⟳</button>
+
+        <button onclick="goHome()">⌂</button>
+
+        <input
+            id="address"
+            class="address"
+            placeholder="Search or enter website address..."
+            onkeydown="handleAddress(event)"
+        >
+
+    </div>
+
+    <div id="content" class="content"></div>
+
+</div>
+
+<script>
+function openURL() {
+    const input = document.getElementById("address");
+    const url = input.value.trim();
+
+    if (!url) return;
+
+    window.auraBrowser.openURL(url);
+}
+
+function handleAddress(event) {
+    if (event.key === "Enter") {
+        openURL();
+    }
+}
+
+function goBack() {
+    window.auraBrowser.back();
+}
+
+function goForward() {
+    window.auraBrowser.forward();
+}
+
+function reloadPage() {
+    window.auraBrowser.reload();
+}
+
+function goHome() {
+    document.getElementById("address").value =
+        "https://www.google.com";
+
+    openURL();
+}
+</script>
+</body>
+</html>

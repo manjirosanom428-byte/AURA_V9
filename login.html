@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AURA V9</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b0b12;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 92%;
+    max-width: 430px;
+    text-align: center;
+}
+
+.intro {
+    margin-bottom: 25px;
+}
+
+.logo {
+    font-size: 42px;
+    font-weight: bold;
+    letter-spacing: 4px;
+}
+
+.tagline {
+    margin-top: 8px;
+    color: #aaa;
+}
+
+.card {
+    background: #12121b;
+    border: 1px solid #292936;
+    border-radius: 18px;
+    padding: 25px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    flex: 1;
+}
+
+.tabs button.active {
+    background: #70ff9b;
+    color: #07100a;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: 1px solid #30303d;
+    background: #181824;
+    color: white;
+    outline: none;
+}
+
+input:focus {
+    border-color: #70ff9b;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: #242438;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #33334d;
+}
+
+.submit {
+    width: 100%;
+    background: #70ff9b;
+    color: #07100a;
+    font-weight: bold;
+}
+
+.message {
+    min-height: 22px;
+    margin-top: 15px;
+    color: #ff7777;
+}
+
+.message.success {
+    color: #70ff9b;
+}
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="intro">
+        <div class="logo">AURA V9</div>
+        <div class="tagline">
+            Your personal AI assistant
+        </div>
+    </div>
+
+    <div class="card">
+
+        <div class="tabs">
+
+            <button
+                id="loginTab"
+                class="active"
+                onclick="showLogin()"
+            >
+                Login
+            </button>
+
+            <button
+                id="registerTab"
+                onclick="showRegister()"
+            >
+                Register
+            </button>
+
+        </div>
+
+
+        <!-- LOGIN -->
+
+        <div id="loginBox">
+
+            <input
+                id="loginUsername"
+                type="text"
+                placeholder="Username"
+                autocomplete="username"
+            >
+
+            <input
+                id="loginPassword"
+                type="password"
+                placeholder="Password"
+                autocomplete="current-password"
+            >
+
+            <button
+                class="submit"
+                onclick="login()"
+            >
+                Enter AURA
+            </button>
+
+        </div>
+
+
+        <!-- REGISTER -->
+
+        <div
+            id="registerBox"
+            class="hidden"
+        >
+
+            <input
+                id="registerUsername"
+                type="text"
+                placeholder="Choose username"
+                autocomplete="username"
+            >
+
+            <input
+                id="registerPassword"
+                type="password"
+                placeholder="Choose password"
+                autocomplete="new-password"
+            >
+
+            <button
+                class="submit"
+                onclick="register()"
+            >
+                Create AURA Account
+            </button>
+
+        </div>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function showMessage(text, success = false) {
+
+    const message =
+        document.getElementById("message");
+
+    message.textContent = text;
+
+    message.className =
+        success
+            ? "message success"
+            : "message";
+}
+
+
+/* ==========================================
+   TABS
+========================================== */
+
+function showLogin() {
+
+    document
+        .getElementById("loginBox")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("registerBox")
+        .classList.add("hidden");
+
+    document
+        .getElementById("loginTab")
+        .classList.add("active");
+
+    document
+        .getElementById("registerTab")
+        .classList.remove("active");
+
+    showMessage("");
+}
+
+
+function showRegister() {
+
+    document
+        .getElementById("loginBox")
+        .classList.add("hidden");
+
+    document
+        .getElementById("registerBox")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("loginTab")
+        .classList.remove("active");
+
+    document
+        .getElementById("registerTab")
+        .classList.add("active");
+
+    showMessage("");
+}
+
+
+/* ==========================================
+   REGISTER
+========================================== */
+
+async function register() {
+
+    const username =
+        document
+            .getElementById("registerUsername")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("registerPassword")
+            .value;
+
+    if (!username || !password) {
+
+        showMessage(
+            "Please enter username and password."
+        );
+
+        return;
+    }
+
+    showMessage("Creating your AURA account...");
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/register",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (data.success) {
+
+            showMessage(
+                "Account created! You can login now.",
+                true
+            );
+
+            document
+                .getElementById("loginUsername")
+                .value = username;
+
+            document
+                .getElementById("loginPassword")
+                .value = "";
+
+            showLogin();
+
+        } else {
+
+            showMessage(
+                data.error ||
+                "Registration failed."
+            );
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Cannot connect to AURA server."
+        );
+    }
+}
+
+
+/* ==========================================
+   LOGIN
+========================================== */
+
+async function login() {
+
+    const username =
+        document
+            .getElementById("loginUsername")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("loginPassword")
+            .value;
+
+    if (!username || !password) {
+
+        showMessage(
+            "Please enter username and password."
+        );
+
+        return;
+    }
+
+    showMessage("Entering AURA...");
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/login",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (data.success) {
+
+            localStorage.setItem(
+                "auraUser",
+                data.username
+            );
+
+            showMessage(
+                `Welcome ${data.username}!`,
+                true
+            );
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "/index.html";
+
+            }, 500);
+
+        } else {
+
+            showMessage(
+                data.error ||
+                "Invalid username or password."
+            );
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Cannot connect to AURA server."
+        );
+    }
+}
+
+
+/* ==========================================
+   ENTER KEY
+========================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key !== "Enter") {
+            return;
+        }
+
+        const registerVisible =
+            !document
+                .getElementById("registerBox")
+                .classList.contains("hidden");
+
+        if (registerVisible) {
+            register();
+        } else {
+            login();
+        }
+    }
+);
+
+</script>
+
+</body>
+</html>
