@@ -529,7 +529,7 @@ if (!USER_ID) {
 async function loadProfile() {
     try {
         const response = await fetch(
-            `/api/profile?userId=${encodeURIComponent(USER_ID)}`
+            `${API_BASE}/api/profile?userId=${encodeURIComponent(USER_ID)}`
         );
 
         const data = await response.json();
@@ -551,7 +551,7 @@ async function loadProfile() {
 async function loadUsage() {
     try {
         const response = await fetch(
-            `/api/usage?userId=${encodeURIComponent(USER_ID)}`
+            `${API_BASE}/api/usage?userId=${encodeURIComponent(USER_ID)}`
         );
 
         const data = await response.json();
@@ -620,7 +620,7 @@ async function loadHistory() {
     try {
 
         const response = await fetch(
-            `/api/history?userId=${encodeURIComponent(USER_ID)}`
+            `${API_BASE}/api/history?userId=${encodeURIComponent(USER_ID)}`
         );
 
         const data = await response.json();
@@ -671,7 +671,7 @@ async function newChat() {
     try {
 
         const response = await fetch(
-            "/api/new-chat",
+            `${API_BASE}/api/new-chat",
             {
                 method: "POST",
 
@@ -731,7 +731,7 @@ async function clearHistory() {
     try {
 
         const response = await fetch(
-            "/api/history",
+            `${API_BASE}/api/history",
             {
                 method: "DELETE",
 
@@ -807,7 +807,7 @@ async function sendChat() {
     try {
 
         const response = await fetch(
-            "/api/chat",
+            `${API_BASE}/api/chat",
             {
                 method: "POST",
 
@@ -1158,7 +1158,7 @@ async function generateImage() {
     try {
 
         const response = await fetch(
-            "/api/generate-image",
+            `${API_BASE}/api/generate-image",
             {
                 method: "POST",
                 headers: {
@@ -1254,7 +1254,7 @@ async function generateVideo(duration) {
     try {
 
         const response = await fetch(
-            "/api/generate-video",
+            `${API_BASE}/api/generate-video",
             {
                 method: "POST",
 
