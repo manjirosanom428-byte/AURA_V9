@@ -671,7 +671,7 @@ async function newChat() {
     try {
 
         const response = await fetch(
-            `${API_BASE}/api/new-chat",
+           `${API_BASE}/api/new-chat`,
             {
                 method: "POST",
 
@@ -731,7 +731,7 @@ async function clearHistory() {
     try {
 
         const response = await fetch(
-            `${API_BASE}/api/history",
+          `${API_BASE}/api/history`,
             {
                 method: "DELETE",
 
@@ -807,7 +807,7 @@ async function sendChat() {
     try {
 
         const response = await fetch(
-            `${API_BASE}/api/chat",
+           `${API_BASE}/api/chat`,
             {
                 method: "POST",
 
@@ -1158,7 +1158,7 @@ async function generateImage() {
     try {
 
         const response = await fetch(
-            `${API_BASE}/api/generate-image",
+           `${API_BASE}/api/generate-image`,
             {
                 method: "POST",
                 headers: {
@@ -1254,7 +1254,7 @@ async function generateVideo(duration) {
     try {
 
         const response = await fetch(
-            `${API_BASE}/api/generate-video",
+           `${API_BASE}/api/generate-video`,
             {
                 method: "POST",
 
