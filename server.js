@@ -390,12 +390,13 @@ if (
 
         const ollamaResponse =
             await fetch(
-                "http://127.0.0.1:11434/api/chat",
+                   "https://ollama.com/api/chat",
                 {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                           "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.OLLAMA_API_KEY}`
                     },
 
                     body: JSON.stringify({
