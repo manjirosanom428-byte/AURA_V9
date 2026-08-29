@@ -1,121 +1,79 @@
-require("dotenv").config();
-
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
 const bcrypt = require("bcryptjs");
-const cors = require("cors");
+
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-/* ==========================================
-   CONFIG
-========================================== */
+app.use(express.json({ limit: "2mb" }));
+app.use(express.static(path.join(__dirname)));
 
-const DATA_FILE = path.join(__dirname, "aura-data.json");
+/*
+==================================================
+TEMPORARY SERVERLESS DATABASE
+==================================================
 
-/* ==========================================
-   MIDDLEWARE
-========================================== */
+IMPORTANT:
+Vercel Functions are serverless.
+This memory is NOT permanent storage.
 
-app.use(express.json({ limit: "10mb" }));
-app.use(express.static(__dirname));
+For production login/history persistence,
+a real database is required.
+*/
 
-/* ==========================================
-   DATABASE
-========================================== */
-app.use(cors({
-    origin: true,
-    credentials: true
-}));
-let database = {
-    users: {},
-    conversations: {}
-};
+const users = {};
+const conversations = {};
 
-function loadDatabase() {
-    try {
-        if (fs.existsSync(DATA_FILE)) {
-            const raw = fs.readFileSync(DATA_FILE, "utf8");
-
-            if (raw.trim()) {
-                database = JSON.parse(raw);
-            }
-
-            database.users ||= {};
-            database.conversations ||= {};
-        }
-    } catch (error) {
-        console.error("Database load error:", error);
-
-        database = {
-            users: {},
-            conversations: {}
-        };
-    }
-}
-
-function saveDatabase() {
-    try {
-        fs.writeFileSync(
-            DATA_FILE,
-            JSON.stringify(database, null, 2),
-            "utf8"
-        );
-    } catch (error) {
-        console.error("Database save error:", error);
-    }
-}
-
-loadDatabase();
-
-/* ==========================================
+/* ================================================
    HELPERS
-========================================== */
+================================================ */
+
+function clean(value) {
+    return String(value || "").trim();
+}
 
 function userExists(username) {
-    return Boolean(database.users[username]);
+    return Boolean(users[username]);
 }
 
 function getConversation(userId) {
-    if (!database.conversations[userId]) {
-        database.conversations[userId] = [];
-        saveDatabase();
+    if (!conversations[userId]) {
+        conversations[userId] = [];
     }
 
-    return database.conversations[userId];
+    return conversations[userId];
 }
 
-/* ==========================================
+/* ================================================
    HOME
-========================================== */
+================================================ */
 
 app.get("/", (req, res) => {
-
     res.sendFile(
         path.join(__dirname, "intro.html")
     );
-
 });
-/* ==========================================
-   API TEST
-========================================== */
+
+/* ================================================
+   TEST
+================================================ */
 
 app.get("/api/test", (req, res) => {
     res.json({
         success: true,
-        message: "AURA V9 API is working!"
+        message: "AURA V9 Vercel API is working."
     });
 });
 
-/* ==========================================
+/* ================================================
    REGISTER
-========================================== */
+================================================ */
 
 app.post("/api/register", async (req, res) => {
+
     try {
+
         const username =
-            String(req.body.username || "").trim();
+            clean(req.body.username);
 
         const password =
             String(req.body.password || "");
@@ -123,79 +81,91 @@ app.post("/api/register", async (req, res) => {
         if (!username || !password) {
             return res.status(400).json({
                 success: false,
-                error: "Username and password are required."
+                error:
+                    "Username and password are required."
             });
         }
 
         if (username.length < 2) {
             return res.status(400).json({
                 success: false,
-                error: "Username must be at least 2 characters."
+                error:
+                    "Username must be at least 2 characters."
             });
         }
 
         if (password.length < 4) {
             return res.status(400).json({
                 success: false,
-                error: "Password must be at least 4 characters."
+                error:
+                    "Password must be at least 4 characters."
             });
         }
 
         if (userExists(username)) {
             return res.status(400).json({
                 success: false,
-                error: "User already exists."
+                error:
+                    "User already exists."
             });
         }
 
         const hashedPassword =
             await bcrypt.hash(password, 10);
 
-        database.users[username] = {
+        users[username] = {
             username,
             password: hashedPassword,
-            createdAt: new Date().toISOString()
+            createdAt:
+                new Date().toISOString()
         };
 
-        database.conversations[username] = [];
+        conversations[username] = [];
 
-        saveDatabase();
-
-        res.json({
+        return res.json({
             success: true,
-            message: "Account created successfully.",
+            message:
+                "Account created successfully.",
             username
         });
 
     } catch (error) {
-        console.error("Register error:", error);
 
-        res.status(500).json({
+        console.error(
+            "Register error:",
+            error
+        );
+
+        return res.status(500).json({
             success: false,
-            error: "Registration failed."
+            error:
+                "Registration failed."
         });
     }
 });
 
-/* ==========================================
+/* ================================================
    LOGIN
-========================================== */
+================================================ */
 
 app.post("/api/login", async (req, res) => {
+
     try {
+
         const username =
-            String(req.body.username || "").trim();
+            clean(req.body.username);
 
         const password =
             String(req.body.password || "");
 
         const user =
-            database.users[username];
+            users[username];
 
         if (!user) {
             return res.status(401).json({
                 success: false,
-                error: "Invalid username or password."
+                error:
+                    "Invalid username or password."
             });
         }
 
@@ -208,301 +178,266 @@ app.post("/api/login", async (req, res) => {
         if (!valid) {
             return res.status(401).json({
                 success: false,
-                error: "Invalid username or password."
+                error:
+                    "Invalid username or password."
             });
         }
 
-        res.json({
+        return res.json({
             success: true,
             username: user.username
         });
 
     } catch (error) {
-        console.error("Login error:", error);
 
-        res.status(500).json({
+        console.error(
+            "Login error:",
+            error
+        );
+
+        return res.status(500).json({
             success: false,
-            error: "Login failed."
+            error:
+                "Login failed."
         });
     }
 });
 
-/* ==========================================
+/* ================================================
    PROFILE
-========================================== */
+================================================ */
 
 app.get("/api/profile", (req, res) => {
+
     const userId =
-        String(req.query.userId || "").trim();
+        clean(req.query.userId);
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
             success: false,
-            error: "User not found."
+            error:
+                "User not found."
         });
     }
 
     const user =
-        database.users[userId];
+        users[userId];
 
-    res.json({
+    return res.json({
         success: true,
+
         profile: {
-            username: user.username,
-            createdAt: user.createdAt
+            username:
+                user.username,
+
+            createdAt:
+                user.createdAt
         }
     });
 });
 
-/* ==========================================
-   CHAT HISTORY
-========================================== */
+/* ================================================
+   HISTORY
+================================================ */
 
 app.get("/api/history", (req, res) => {
+
     const userId =
-        String(req.query.userId || "").trim();
+        clean(req.query.userId);
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
             success: false,
-            error: "User not found."
+            error:
+                "User not found."
         });
     }
 
-    res.json({
-        success: true,
-        history: getConversation(userId)
-    });
-});
-
-/* ==========================================
-   NEW CHAT
-========================================== */
-
-app.post("/api/new-chat", (req, res) => {
-    const userId =
-        String(req.body.userId || "").trim();
-
-    if (!userId || !userExists(userId)) {
-        return res.status(404).json({
-            success: false,
-            error: "User not found."
-        });
-    }
-
-    database.conversations[userId] = [];
-
-    saveDatabase();
-
-    res.json({
-        success: true,
-        message: "New chat started.",
-        greeting: "Vaanga, Vanakkam!"
-    });
-});
-
-/* ==========================================
-   CLEAR CHAT HISTORY
-========================================== */
-
-app.delete("/api/history", (req, res) => {
-    const userId =
-        String(req.body.userId || "").trim();
-
-    if (!userId || !userExists(userId)) {
-        return res.status(404).json({
-            success: false,
-            error: "User not found."
-        });
-    }
-
-    database.conversations[userId] = [];
-
-    saveDatabase();
-
-    res.json({
-        success: true,
-        message: "Chat history cleared."
-    });
-});
-
-/* ==========================================
-   LOCAL AI CHAT
-========================================== */
-
-app.post("/api/chat", async (req, res) => {
-    try {
-        const userId =
-            String(req.body.userId || "").trim();
-
-        const message =
-            String(req.body.message || "").trim();
-if (
-    message.toLowerCase().includes("who created you") ||
-    message.toLowerCase().includes("who made you") ||
-    message.toLowerCase().includes("who is your creator")
-) {
     return res.json({
         success: true,
-        reply: "S. Yogee created me."
+        history:
+            getConversation(userId)
     });
-}
-        if (!userId) {
-            return res.status(400).json({
+});
+
+/* ================================================
+   NEW CHAT
+================================================ */
+
+app.post("/api/new-chat", (req, res) => {
+
+    const userId =
+        clean(req.body.userId);
+
+    if (!userId || !userExists(userId)) {
+        return res.status(404).json({
+            success: false,
+            error:
+                "User not found."
+        });
+    }
+
+    conversations[userId] = [];
+
+    return res.json({
+        success: true,
+        message:
+            "New chat started."
+    });
+});
+
+/* ================================================
+   CLEAR HISTORY
+================================================ */
+
+app.delete("/api/history", (req, res) => {
+
+    const userId =
+        clean(req.body.userId);
+
+    if (!userId || !userExists(userId)) {
+        return res.status(404).json({
+            success: false,
+            error:
+                "User not found."
+        });
+    }
+
+    conversations[userId] = [];
+
+    return res.json({
+        success: true,
+        message:
+            "Chat history cleared."
+    });
+});
+
+/* ================================================
+   CHAT
+================================================ */
+
+app.post("/api/chat", (req, res) => {
+
+    try {
+
+        const userId =
+            clean(req.body.userId);
+
+        const message =
+            clean(req.body.message);
+
+        if (!userId || !userExists(userId)) {
+            return res.status(401).json({
                 success: false,
-                error: "User ID is required."
+                error:
+                    "Please login first."
             });
         }
 
         if (!message) {
             return res.status(400).json({
                 success: false,
-                error: "Message is required."
-            });
-        }
-
-        if (!userExists(userId)) {
-            return res.status(401).json({
-                success: false,
-                error: "Please login first."
+                error:
+                    "Message is required."
             });
         }
 
         const history =
             getConversation(userId);
 
-        const userName =
-            database.users[userId].username;
-
         history.push({
             role: "user",
             content: message,
-            time: new Date().toISOString()
+            time:
+                new Date().toISOString()
         });
 
-        const recentHistory =
-            history
-                .slice(-20)
-                .map(item => ({
-                    role: item.role,
-                    content: item.content
-                }));
+        /*
+        ==========================================
+        TEMPORARY VERCEL RESPONSE
+        ==========================================
 
-        const ollamaResponse =
-            await fetch(
-                   "https://ollama.com/api/chat",
-                {
-                    method: "POST",
+        Ollama was removed because
+        127.0.0.1:11434 is your local computer,
+        not Vercel.
 
-                    headers: {
-                           "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.OLLAMA_API_KEY}`
-                    },
+        Real AI provider can be connected here later.
+        */
 
-                    body: JSON.stringify({
-                        model: "qwen2.5:1.5b",
+        const lower =
+            message.toLowerCase();
 
-                        stream: false,
+        let reply;
 
-                        messages: [
-                            {
-                                role: "system",
+        if (
+            lower.includes("who created you") ||
+            lower.includes("who made you") ||
+            lower.includes("who is your creator")
+        ) {
 
-                                content: `
-You are AURA V9, the user's personal AI assistant.
+            reply =
+                "I am AURA V9, created as part of the AURA V9 project.";
 
-The user's name is ${userName}.
+        } else if (
+            lower.includes("hello") ||
+            lower.includes("hi") ||
+            lower.includes("vanakkam")
+        ) {
 
-Always remember that you are AURA V9.
+            reply =
+                "Vanakkam! 👋 AURA V9 is online.";
 
-Be friendly, helpful and natural.
+        } else {
 
-If the user speaks English, reply in English.
-If the user speaks Tamil, reply in Tamil.
-If the user speaks Tanglish, reply in Tanglish.
-If the user mixes Tamil and English, reply naturally in the same style.
-
-Answer the user's actual question.
-Do not give random fixed responses.
-Do not translate unless the user asks for translation.
-If the user asks who created you, who made you, or who is your creator, answer exactly:
-"S. Yogee created me."
-Do not give a different creator name.
-`                            },
-
-                            ...recentHistory
-                        ]
-                    })
-                }
-            );
-
-        const data =
-            await ollamaResponse.json();
-
-        if (!ollamaResponse.ok) {
-            throw new Error(
-                data.error ||
-                "Ollama request failed."
-            );
+            reply =
+                "AURA V9 is online, but the AI engine is not connected yet. The Vercel server is working correctly.";
         }
-
-        const reply =
-            data.message?.content ||
-            "AURA could not generate a response.";
 
         history.push({
             role: "assistant",
             content: reply,
-            time: new Date().toISOString()
+            time:
+                new Date().toISOString()
         });
 
-        database.conversations[userId] =
+        conversations[userId] =
             history.slice(-100);
 
-        saveDatabase();
-
-        res.json({
+        return res.json({
             success: true,
             reply
         });
 
     } catch (error) {
-        console.error("Chat error:", error);
 
-        res.status(500).json({
+        console.error(
+            "Chat error:",
+            error
+        );
+
+        return res.status(500).json({
             success: false,
             error:
-                "AURA AI is unavailable. Make sure Ollama is running."
+                "AURA chat service failed."
         });
     }
 });
 
-/* ==========================================
-   404 API
-========================================== */
+/* ================================================
+   API 404
+================================================ */
 
 app.use("/api", (req, res) => {
-    res.status(404).json({
+
+    return res.status(404).json({
         success: false,
-        error: "AURA API endpoint not found."
+        error:
+            "AURA API endpoint not found."
     });
 });
 
-/* ==========================================
-   START SERVER
-========================================== */
+/* ================================================
+   VERCEL EXPORT
+================================================ */
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log("=================================");
-    console.log("        AURA V9 ONLINE");
-    console.log("=================================");
-    console.log("AI Engine: Ollama");
-    console.log("Model: qwen2.5:1.5b");
-    console.log("Database: aura-data.json");
-    console.log("Chat History: Persistent");
-    console.log("User Profiles: Persistent");
-    console.log("Image Generation: Removed");
-    console.log("Video Generation: Removed");
-    console.log(`Server running on port ${PORT}`);
-    console.log("=================================");
-});
+module.exports = app;
