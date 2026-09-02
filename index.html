@@ -1157,88 +1157,55 @@ footer {
 <script src="https://js.puter.com/v2/"></script>
 
 <script>
-
-/* ==========================================
-   USER
-========================================== */
-
-const USER_ID =
-    localStorage.getItem("auraUser");
+const USER_ID = localStorage.getItem("auraUser");
 
 if (!USER_ID) {
     window.location.href = "/login.html";
 }
 
-
-/* ==========================================
+/* =========================
    PROFILE
-========================================== */
+========================= */
 
 async function loadProfile() {
-
     try {
+        const response = await fetch(
+            `/api/profile?userId=${encodeURIComponent(USER_ID)}`
+        );
 
-        const response =
-            await fetch(
-                `/api/profile?userId=${encodeURIComponent(USER_ID)}`
-            );
-
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (data.success) {
-
-            document.getElementById(
-                "profileName"
-            ).textContent =
+            document.getElementById("profileName").textContent =
                 `👤 ${data.profile.username}`;
         }
-
     } catch (error) {
-
-        console.error(
-            "Profile error:",
-            error
-        );
+        console.error("Profile error:", error);
     }
 }
 
+/* =========================
+   MESSAGE
+========================= */
 
-/* ==========================================
-   ADD MESSAGE
-========================================== */
-
-function addMessage(
-    text,
-    type,
-    time = null
-) {
-
-    const welcome =
-        document.getElementById("welcome");
+function addMessage(text, type, time = null) {
+    const welcome = document.getElementById("welcome");
 
     if (welcome) {
         welcome.remove();
     }
 
-    const messages =
-        document.getElementById("messages");
+    const messages = document.getElementById("messages");
 
-    const div =
-        document.createElement("div");
+    const div = document.createElement("div");
+    div.className = `message ${type}`;
 
-    div.className =
-        `message ${type}`;
-
-    div.innerHTML= text;
+    div.textContent = text;
 
     if (time) {
+        const timeElement = document.createElement("span");
 
-        const timeElement =
-            document.createElement("span");
-
-        timeElement.className =
-            "message-time";
+        timeElement.className = "message-time";
 
         timeElement.textContent =
             new Date(time).toLocaleString();
@@ -1247,27 +1214,57 @@ function addMessage(
     }
 
     messages.appendChild(div);
-
-    messages.scrollTop =
-        messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight;
 }
 
+/* =========================
+   THINKING DOTS
+========================= */
 
-/* ==========================================
-   LOAD HISTORY
-========================================== */
+function showThinking() {
+    const messages = document.getElementById("messages");
+
+    const div = document.createElement("div");
+
+    div.className = "message aura";
+    div.id = "auraThinking";
+
+    div.innerHTML = `
+        <span style="
+            display:inline-flex;
+            gap:5px;
+            align-items:center;
+        ">
+            <span class="thinking-dot">●</span>
+            <span class="thinking-dot">●</span>
+            <span class="thinking-dot">●</span>
+        </span>
+    `;
+
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function hideThinking() {
+    const thinking =
+        document.getElementById("auraThinking");
+
+    if (thinking) {
+        thinking.remove();
+    }
+}
+
+/* =========================
+   HISTORY
+========================= */
 
 async function loadHistory() {
-
     try {
+        const response = await fetch(
+            `/api/history?userId=${encodeURIComponent(USER_ID)}`
+        );
 
-        const response =
-            await fetch(
-                `/api/history?userId=${encodeURIComponent(USER_ID)}`
-            );
-
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (!data.success) return;
 
@@ -1276,23 +1273,17 @@ async function loadHistory() {
 
         messages.innerHTML = "";
 
-        if (
-            !data.history ||
-            data.history.length === 0
-        ) {
-
+        if (!data.history || data.history.length === 0) {
             messages.innerHTML = `
                 <div class="welcome" id="welcome">
                     <h1>Welcome back 🤖</h1>
                     <p>Your AURA conversation is ready.</p>
                 </div>
             `;
-
             return;
         }
 
         data.history.forEach(item => {
-
             addMessage(
                 item.content,
                 item.role === "user"
@@ -1300,122 +1291,86 @@ async function loadHistory() {
                     : "aura",
                 item.time
             );
-
         });
 
     } catch (error) {
-
-        console.error(
-            "History error:",
-            error
-        );
+        console.error("History error:", error);
     }
 }
 
-
-/* ==========================================
+/* =========================
    NEW CHAT
-========================================== */
+========================= */
 
 async function newChat() {
-
     try {
+        const response = await fetch(
+            "/api/new-chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    userId: USER_ID
+                })
+            }
+        );
 
-        const response =
-            await fetch(
-                "/api/new-chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        userId: USER_ID
-                    })
-                }
-            );
-
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (!data.success) {
-
             addMessage(
-                data.error ||
-                "Could not start new chat.",
+                data.error || "Could not start new chat.",
                 "aura"
             );
-
             return;
         }
 
-        document.getElementById(
-            "messages"
-        ).innerHTML = `
+        document.getElementById("messages").innerHTML = `
             <div class="welcome" id="welcome">
                 <h1>Vaanga, Vanakkam! 👋</h1>
                 <p>New AURA conversation started.</p>
             </div>
         `;
 
-        speak(
-            "Vaanga, Vanakkam!"
-        );
+        speak("Vanakkam!");
 
     } catch (error) {
-
-        console.error(
-            "New chat error:",
-            error
-        );
+        console.error("New chat error:", error);
     }
 }
 
-
-/* ==========================================
+/* =========================
    CLEAR HISTORY
-========================================== */
+========================= */
 
 async function clearHistory() {
-
-    const confirmed =
-        confirm(
-            "Clear all your AURA chat history?"
-        );
+    const confirmed = confirm(
+        "Clear all your AURA chat history?"
+    );
 
     if (!confirmed) return;
 
     try {
+        const response = await fetch(
+            "/api/history",
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    userId: USER_ID
+                })
+            }
+        );
 
-        const response =
-            await fetch(
-                "/api/history",
-                {
-                    method: "DELETE",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        userId: USER_ID
-                    })
-                }
-            );
-
-        const data =
-            await response.json();
+        const data = await response.json();
 
         if (data.success) {
-
             await newChat();
-
         } else {
-
             alert(
                 data.error ||
                 "Could not clear history."
@@ -1423,48 +1378,87 @@ async function clearHistory() {
         }
 
     } catch (error) {
-
-        alert(
-            "Could not connect to AURA."
-        );
+        alert("Could not connect to AURA.");
     }
 }
 
-
-/* ==========================================
+/* =========================
    CHAT
-========================================== */
-
+========================= */
 
 async function sendChat() {
+    const input =
+        document.getElementById("prompt");
 
-    const input = document.getElementById("prompt");
-    const message = input.value.trim();
+    const message =
+        input.value.trim();
 
     if (!message) return;
 
-    // Show user message
+    /* MUSIC COMMAND */
+
+    if (
+        message.toLowerCase().startsWith("play ")
+    ) {
+        const query =
+            message
+                .replace(/^play\s+/i, "")
+                .trim();
+
+        if (query) {
+            document
+                .getElementById("musicPanel")
+                .classList.add("active");
+
+            document
+                .getElementById("musicInfo")
+                .textContent =
+                `🎵 Searching for "${query}"...`;
+
+            const url =
+                "https://www.youtube.com/results?search_query=" +
+                encodeURIComponent(query);
+
+            window.open(url, "_blank");
+
+            input.value = "";
+
+            return;
+        }
+    }
+
     addMessage(message, "user");
 
-    // Clear input immediately
     input.value = "";
+
+    showThinking();
 
     try {
 
-        const response = await fetch("/api/chat", {
-            method: "POST",
+        /* =========================
+           FIRST TRY YOUR SERVER
+        ========================= */
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+        const response = await fetch(
+            "/api/chat",
+            {
+                method: "POST",
 
-            body: JSON.stringify({
-                userId: USER_ID,
-                message: message
-            })
-        });
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    userId: USER_ID,
+                    message: message
+                })
+            }
+        );
 
         const data = await response.json();
+
+        hideThinking();
 
         if (data.success) {
 
@@ -1474,68 +1468,139 @@ async function sendChat() {
                 new Date().toISOString()
             );
 
-            // Voice reply if Kural is ON
             if (voiceEnabled) {
                 speak(data.reply);
             }
 
-        } else {
+            return;
+        }
+
+        /* =========================
+           PUTER FALLBACK
+        ========================= */
+
+        await puterChat(message);
+
+    } catch (error) {
+
+        console.error(
+            "Server connection error:",
+            error
+        );
+
+        hideThinking();
+
+        try {
+
+            await puterChat(message);
+
+        } catch (puterError) {
+
+            console.error(
+                "Puter error:",
+                puterError
+            );
 
             addMessage(
-                data.error || "Something went wrong.",
+                "❌ Cannot connect to AURA.",
                 "aura"
             );
+        }
+    }
+}
+
+/* =========================
+   PUTER AI
+========================= */
+
+async function puterChat(message) {
+
+    showThinking();
+
+    try {
+
+        const response =
+            await puter.ai.chat(
+                message,
+                {
+                    model: "gpt-4o-mini"
+                }
+            );
+
+        hideThinking();
+
+        let reply = "";
+
+        if (
+            response &&
+            response.message &&
+            response.message.content
+        ) {
+            reply =
+                response.message.content;
+        } else if (
+            response &&
+            response.content
+        ) {
+            reply =
+                response.content;
+        } else {
+            reply =
+                String(response);
+        }
+
+        addMessage(
+            reply,
+            "aura",
+            new Date().toISOString()
+        );
+
+        if (voiceEnabled) {
+            speak(reply);
         }
 
     } catch (error) {
 
-        console.error("Chat error:", error);
+        hideThinking();
+
+        console.error(
+            "Puter AI error:",
+            error
+        );
 
         addMessage(
-            "❌ Cannot connect to AURA server.",
+            "❌ AURA AI is unavailable right now.",
             "aura"
         );
     }
 }
-/* ==========================================
-   KURAL VOICE
-========================================== */
+
+/* =========================
+   VOICE
+========================= */
 
 let voiceEnabled = false;
-
 let recognition = null;
-
 let listening = false;
-
 
 function speak(text) {
 
-    if (
-        !("speechSynthesis" in window)
-    ) {
+    if (!("speechSynthesis" in window)) {
         return;
     }
 
     speechSynthesis.cancel();
 
     const utterance =
-        new SpeechSynthesisUtterance(
-            text
-        );
+        new SpeechSynthesisUtterance(text);
 
     utterance.rate = 1;
-
     utterance.pitch = 1;
 
-    speechSynthesis.speak(
-        utterance
-    );
+    speechSynthesis.speak(utterance);
 }
 
-
-function updateKuralButton(
-    active
-) {
+function updateKuralButton(active) {
 
     const button =
         document.getElementById(
@@ -1570,7 +1635,6 @@ function updateKuralButton(
     }
 }
 
-
 function startKuralListening() {
 
     const SpeechRecognition =
@@ -1596,19 +1660,13 @@ function startKuralListening() {
     recognition =
         new SpeechRecognition();
 
-    recognition.lang =
-        "en-IN";
-
-    recognition.continuous =
-        false;
-
-    recognition.interimResults =
-        true;
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
     listening = true;
 
     updateKuralButton(true);
-
 
     recognition.onresult =
         function(event) {
@@ -1628,9 +1686,7 @@ function startKuralListening() {
                 if (
                     event.results[i].isFinal
                 ) {
-
-                    finalText +=
-                        transcript;
+                    finalText += transcript;
                 }
             }
 
@@ -1638,11 +1694,9 @@ function startKuralListening() {
 
                 document.getElementById(
                     "prompt"
-                ).value =
-                    finalText;
+                ).value = finalText;
             }
         };
-
 
     recognition.onerror =
         function(event) {
@@ -1657,7 +1711,6 @@ function startKuralListening() {
             updateKuralButton(false);
         };
 
-
     recognition.onend =
         function() {
 
@@ -1666,10 +1719,8 @@ function startKuralListening() {
             updateKuralButton(false);
         };
 
-
     recognition.start();
 }
-
 
 document
     .getElementById("kuralButton")
@@ -1690,10 +1741,9 @@ document
         }
     );
 
-
-/* ==========================================
+/* =========================
    MUSIC
-========================================== */
+========================= */
 
 function musicMode() {
 
@@ -1702,16 +1752,13 @@ function musicMode() {
             "musicPanel"
         );
 
-    panel.classList.add(
-        "active"
-    );
+    panel.classList.add("active");
 
     document.getElementById(
         "musicInfo"
     ).textContent =
-        "🎵 Type a song name in the chat box, then choose YouTube or Spotify.";
+        "🎵 Type a song name and choose YouTube or Spotify.";
 }
-
 
 function getMusicQuery() {
 
@@ -1736,7 +1783,6 @@ function getMusicQuery() {
     return query;
 }
 
-
 function playOnYouTube() {
 
     const query =
@@ -1753,12 +1799,8 @@ function playOnYouTube() {
     ).textContent =
         `▶️ YouTube: ${query}`;
 
-    window.open(
-        url,
-        "_blank"
-    );
+    window.open(url, "_blank");
 }
-
 
 function playOnSpotify() {
 
@@ -1776,28 +1818,19 @@ function playOnSpotify() {
     ).textContent =
         `🎧 Spotify: ${query}`;
 
-    window.open(
-        url,
-        "_blank"
-    );
+    window.open(url, "_blank");
 }
-
 
 function closeMusicMode() {
 
     document
-        .getElementById(
-            "musicPanel"
-        )
-        .classList.remove(
-            "active"
-        );
+        .getElementById("musicPanel")
+        .classList.remove("active");
 }
 
-
-/* ==========================================
+/* =========================
    LOGOUT
-========================================== */
+========================= */
 
 function logout() {
 
@@ -1809,10 +1842,9 @@ function logout() {
         "/login.html";
 }
 
-
-/* ==========================================
+/* =========================
    ENTER KEY
-========================================== */
+========================= */
 
 document
     .getElementById("prompt")
@@ -1832,15 +1864,12 @@ document
         }
     );
 
-
-/* ==========================================
+/* =========================
    START
-========================================== */
+========================= */
 
 loadProfile();
-
 loadHistory();
-
 </script>
 
 </body>
