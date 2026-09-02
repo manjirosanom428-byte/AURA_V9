@@ -1,12 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+<script src="https://js.puter.com/v2/"></script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>AURA V9</title>
 
 <style>
+.aura-thinking-animation {
+    width: 55px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+}
 * {
     box-sizing: border-box;
     margin: 0;
@@ -16,14 +28,22 @@
 html,
 body {
     width: 100%;
-    min-height: 100%;
+    height: 100%;
 }
 
 body {
-    font-family: Arial, sans-serif;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     background: #05020c;
+
     color: white;
+
     min-height: 100vh;
+
     overflow-x: hidden;
 }
 
@@ -32,55 +52,86 @@ body {
 ========================================== */
 
 body::before {
+
     content: "";
+
     position: fixed;
-    inset: 0;
+
+    inset: -5%;
+
     z-index: -5;
 
-    background:
+    background-image:
         linear-gradient(
             rgba(5, 2, 12, 0.30),
-            rgba(5, 2, 12, 0.55)
+            rgba(5, 2, 12, 0.48)
         ),
         url("aura-bg.png");
 
     background-size: cover;
+
     background-position: center;
+
     background-repeat: no-repeat;
 
-    animation: animeBackground 18s ease-in-out infinite alternate;
+    animation:
+        animeBackground
+        18s
+        ease-in-out
+        infinite
+        alternate;
+
+    transform: scale(1.02);
 }
 
+/* ==========================================
+   PURPLE ENERGY
+========================================== */
+
 body::after {
+
     content: "";
+
     position: fixed;
-    inset: -20%;
+
+    inset: -30%;
+
     z-index: -4;
+
     pointer-events: none;
 
     background:
+
         radial-gradient(
             circle at 20% 30%,
-            rgba(168, 85, 247, 0.45),
-            transparent 22%
+            rgba(190, 60, 255, 0.38),
+            transparent 20%
         ),
+
         radial-gradient(
-            circle at 50% 60%,
-            rgba(124, 58, 237, 0.30),
-            transparent 28%
+            circle at 70% 35%,
+            rgba(110, 30, 255, 0.32),
+            transparent 25%
         ),
+
         radial-gradient(
-            circle at 85% 35%,
-            rgba(192, 80, 255, 0.28),
+            circle at 45% 75%,
+            rgba(160, 40, 255, 0.28),
             transparent 25%
         );
 
-    filter: blur(25px);
+    filter: blur(22px);
 
-    animation: purpleEnergy 8s ease-in-out infinite alternate;
+    animation:
+        purpleEnergy
+        8s
+        ease-in-out
+        infinite
+        alternate;
 }
 
 @keyframes animeBackground {
+
     0% {
         background-position: 48% 50%;
         transform: scale(1);
@@ -88,63 +139,89 @@ body::after {
 
     50% {
         background-position: 52% 48%;
-        transform: scale(1.03);
+        transform: scale(1.04);
     }
 
     100% {
         background-position: 48% 52%;
-        transform: scale(1.06);
+        transform: scale(1.07);
     }
 }
 
 @keyframes purpleEnergy {
+
     0% {
-        transform: rotate(0deg) scale(1);
+        transform:
+            translate(-3%, -2%)
+            rotate(0deg)
+            scale(1);
+
         opacity: 0.55;
     }
 
     50% {
-        transform: rotate(3deg) scale(1.08);
-        opacity: 0.85;
+        transform:
+            translate(4%, 3%)
+            rotate(3deg)
+            scale(1.08);
+
+        opacity: 0.9;
     }
 
     100% {
-        transform: rotate(-3deg) scale(1);
-        opacity: 0.60;
+        transform:
+            translate(-2%, 5%)
+            rotate(-3deg)
+            scale(1.04);
+
+        opacity: 0.65;
     }
 }
 
 /* ==========================================
-   PURPLE PARTICLES
+   PARTICLES
 ========================================== */
 
 .aura-particles {
+
     position: fixed;
+
     inset: 0;
+
     pointer-events: none;
+
     overflow: hidden;
-    z-index: 0;
+
+    z-index: 1;
 }
 
 .aura-particle {
+
     position: absolute;
 
     width: 5px;
     height: 5px;
 
-    background: #c77dff;
     border-radius: 50%;
+
+    background: #c77dff;
 
     box-shadow:
         0 0 8px #a855f7,
         0 0 18px #7c3aed,
         0 0 30px #9333ea;
 
-    animation: particleFloat 8s linear infinite;
+    animation:
+        particleFloat
+        8s
+        linear
+        infinite;
 }
 
 @keyframes particleFloat {
+
     0% {
+
         transform:
             translateY(110vh)
             translateX(-20px)
@@ -158,6 +235,7 @@ body::after {
     }
 
     50% {
+
         transform:
             translateY(50vh)
             translateX(40px)
@@ -171,6 +249,7 @@ body::after {
     }
 
     100% {
+
         transform:
             translateY(-10vh)
             translateX(-60px)
@@ -185,90 +264,119 @@ body::after {
 ========================================== */
 
 #auraIntro {
+
     position: fixed;
+
     inset: 0;
+
     z-index: 9999;
 
     display: flex;
+
     flex-direction: column;
-    align-items: center;
+
     justify-content: center;
+
+    align-items: center;
 
     background:
         radial-gradient(
             circle,
-            rgba(120, 30, 255, 0.25),
+            #241044,
             #05020c 65%
         );
 
-    animation: introFade 3s forwards;
+    animation:
+        introFade
+        2.5s
+        ease
+        forwards;
+
     pointer-events: none;
 }
 
 .intro-logo {
-    font-size: 58px;
+
+    font-size: 60px;
+
     font-weight: 900;
+
     letter-spacing: 8px;
 
-    color: #ffffff;
+    color: #d8a0ff;
 
     text-shadow:
         0 0 10px #a855f7,
         0 0 30px #7c3aed,
         0 0 60px #9333ea;
 
-    animation: logoPulse 1.5s ease-in-out infinite;
+    animation:
+        logoPulse
+        1.2s
+        ease-in-out
+        infinite alternate;
 }
 
 .intro-line {
-    width: 240px;
-    height: 3px;
+
+    width: 0;
+
+    height: 2px;
+
     margin-top: 20px;
 
-    background: #a855f7;
+    background: #c77dff;
 
     box-shadow:
-        0 0 10px #a855f7,
-        0 0 25px #7c3aed;
+        0 0 15px #a855f7,
+        0 0 30px #9333ea;
 
-    animation: lineMove 1.5s ease-in-out infinite;
+    animation:
+        lineLoad
+        1.5s
+        ease
+        forwards;
 }
 
 .intro-status {
-    margin-top: 16px;
+
+    margin-top: 15px;
 
     font-size: 13px;
+
     letter-spacing: 4px;
 
-    color: #d8b4fe;
+    color: #c9a8ff;
 }
 
 @keyframes logoPulse {
-    0%, 100% {
+
+    from {
         transform: scale(1);
         opacity: 0.75;
     }
 
-    50% {
+    to {
         transform: scale(1.05);
         opacity: 1;
     }
 }
 
-@keyframes lineMove {
-    0%, 100% {
-        transform: scaleX(0.5);
+@keyframes lineLoad {
+
+    from {
+        width: 0;
     }
 
-    50% {
-        transform: scaleX(1);
+    to {
+        width: 260px;
     }
 }
 
 @keyframes introFade {
+
     0% {
         opacity: 1;
-        visibility: visible;
     }
 
     75% {
@@ -286,13 +394,17 @@ body::after {
 ========================================== */
 
 .app {
-    position: relative;
-    z-index: 2;
 
     width: 100%;
+
     min-height: 100vh;
 
+    position: relative;
+
+    z-index: 2;
+
     display: flex;
+
     flex-direction: column;
 }
 
@@ -301,67 +413,82 @@ body::after {
 ========================================== */
 
 header {
-    min-height: 78px;
+
+    min-height: 75px;
+
+    padding:
+        15px 25px;
 
     display: flex;
-    align-items: center;
+
     justify-content: space-between;
 
-    padding: 16px 24px;
+    align-items: center;
 
-    background: rgba(5, 2, 12, 0.70);
+    background:
+        rgba(8, 3, 20, 0.72);
+
+    backdrop-filter: blur(14px);
 
     border-bottom:
-        1px solid rgba(168, 85, 247, 0.35);
-
-    backdrop-filter: blur(15px);
-
-    box-shadow:
-        0 5px 30px rgba(100, 20, 255, 0.12);
+        1px solid
+        rgba(168, 85, 247, 0.35);
 }
 
 .logo {
+
     font-size: 25px;
+
     font-weight: 900;
+
     letter-spacing: 3px;
 
-    color: #ffffff;
+    color: #d8a0ff;
 
     text-shadow:
-        0 0 8px #a855f7,
-        0 0 20px #7c3aed;
+        0 0 10px #9333ea,
+        0 0 25px #7c3aed;
 }
 
 .profile {
+
     margin-top: 5px;
 
     font-size: 13px;
-    color: #c4b5fd;
+
+    color: #c9b5df;
 }
 
 .top-actions {
+
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 }
 
 .status {
-    color: #70ff9b;
-    font-size: 13px;
-    font-weight: bold;
 
-    text-shadow:
-        0 0 10px rgba(112, 255, 155, 0.7);
+    color: #70ff9b;
+
+    font-size: 12px;
+
+    font-weight: bold;
 }
 
 .icon-btn {
-    border: 1px solid rgba(168, 85, 247, 0.5);
 
-    background: rgba(40, 10, 70, 0.65);
+    border: 1px solid
+        rgba(168, 85, 247, 0.55);
+
+    background:
+        rgba(55, 15, 90, 0.65);
 
     color: white;
 
-    padding: 9px 13px;
+    padding:
+        9px 13px;
 
     border-radius: 10px;
 
@@ -371,95 +498,15 @@ header {
 }
 
 .icon-btn:hover {
+
     transform: translateY(-2px);
 
-    background: rgba(110, 30, 180, 0.75);
+    background:
+        rgba(120, 40, 190, 0.7);
 
     box-shadow:
-        0 0 15px rgba(168, 85, 247, 0.5);
-}
-
-/* ==========================================
-   MUSIC PANEL
-========================================== */
-
-.music-panel {
-    position: fixed;
-
-    right: 25px;
-    top: 95px;
-
-    width: 330px;
-
-    padding: 20px;
-
-    border-radius: 18px;
-
-    background: rgba(12, 5, 25, 0.90);
-
-    border:
-        1px solid rgba(168, 85, 247, 0.6);
-
-    box-shadow:
-        0 0 35px rgba(126, 34, 206, 0.35);
-
-    backdrop-filter: blur(18px);
-
-    transform: translateX(380px);
-
-    opacity: 0;
-
-    transition: 0.35s;
-
-    z-index: 20;
-}
-
-.music-panel.active {
-    transform: translateX(0);
-    opacity: 1;
-}
-
-.music-title {
-    font-size: 18px;
-    font-weight: bold;
-
-    color: #d8b4fe;
-
-    margin-bottom: 10px;
-}
-
-.music-info {
-    font-size: 13px;
-
-    color: #c4b5fd;
-
-    min-height: 38px;
-}
-
-.music-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    margin-top: 15px;
-}
-
-.music-controls button {
-    border: 1px solid rgba(168, 85, 247, 0.5);
-
-    background: rgba(80, 20, 130, 0.65);
-
-    color: white;
-
-    padding: 9px 12px;
-
-    border-radius: 9px;
-
-    cursor: pointer;
-}
-
-.music-controls button:hover {
-    background: rgba(126, 34, 206, 0.8);
+        0 0 18px
+        rgba(168, 85, 247, 0.45);
 }
 
 /* ==========================================
@@ -467,73 +514,78 @@ header {
 ========================================== */
 
 .chat {
+
     width: min(1000px, 94%);
 
-    margin: 25px auto;
+    margin:
+        20px auto;
 
     flex: 1;
 
     display: flex;
+
     flex-direction: column;
 
-    min-height: calc(100vh - 155px);
+    min-height:
+        calc(100vh - 145px);
 }
 
 .messages {
+
     flex: 1;
 
     overflow-y: auto;
 
-    padding: 25px;
+    padding:
+        20px;
 
     border-radius: 22px;
 
-    background: rgba(5, 2, 15, 0.55);
+    background:
+        rgba(8, 3, 20, 0.50);
+
+    backdrop-filter: blur(12px);
 
     border:
-        1px solid rgba(168, 85, 247, 0.25);
-
-    backdrop-filter: blur(10px);
+        1px solid
+        rgba(168, 85, 247, 0.28);
 
     box-shadow:
-        inset 0 0 40px rgba(100, 20, 255, 0.08);
+        0 0 35px
+        rgba(80, 20, 150, 0.18);
 }
-
-.messages::-webkit-scrollbar {
-    width: 7px;
-}
-
-.messages::-webkit-scrollbar-thumb {
-    background: #7c3aed;
-    border-radius: 20px;
-}
-
-/* ==========================================
-   WELCOME
-========================================== */
 
 .welcome {
-    min-height: 420px;
+
+    min-height: 350px;
 
     display: flex;
+
     flex-direction: column;
+
     justify-content: center;
+
     align-items: center;
 
     text-align: center;
 }
 
 .welcome h1 {
-    font-size: clamp(30px, 5vw, 52px);
+
+    font-size: 38px;
 
     margin-bottom: 12px;
 
+    color: #eee0ff;
+
     text-shadow:
-        0 0 15px rgba(168, 85, 247, 0.7);
+        0 0 20px
+        rgba(168, 85, 247, 0.7);
 }
 
 .welcome p {
-    color: #c4b5fd;
+
+    color: #cbbbd9;
 
     font-size: 16px;
 }
@@ -543,71 +595,65 @@ header {
 ========================================== */
 
 .message {
-    width: fit-content;
+
     max-width: 78%;
 
-    padding: 13px 16px;
+    padding:
+        13px 16px;
 
-    margin: 10px 0;
+    margin:
+        10px 0;
 
-    border-radius: 15px;
+    border-radius: 16px;
 
     line-height: 1.5;
 
+    white-space: pre-wrap;
+
     word-wrap: break-word;
-
-    animation: messageIn 0.25s ease;
-}
-
-@keyframes messageIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .message.user {
+
     margin-left: auto;
 
     background:
         linear-gradient(
             135deg,
-            rgba(126, 34, 206, 0.85),
-            rgba(88, 28, 135, 0.85)
+            #7c3aed,
+            #4c1d95
         );
 
     border:
-        1px solid rgba(216, 180, 254, 0.25);
+        1px solid
+        rgba(216, 180, 254, 0.3);
 
     box-shadow:
-        0 0 15px rgba(126, 34, 206, 0.20);
+        0 0 20px
+        rgba(124, 58, 237, 0.25);
 }
 
 .message.aura {
+
     margin-right: auto;
 
-    background: rgba(20, 8, 35, 0.82);
+    background:
+        rgba(28, 12, 48, 0.78);
 
     border:
-        1px solid rgba(168, 85, 247, 0.28);
-
-    box-shadow:
-        0 0 15px rgba(126, 34, 206, 0.12);
+        1px solid
+        rgba(168, 85, 247, 0.32);
 }
 
 .message-time {
+
     display: block;
 
     margin-top: 6px;
 
     font-size: 10px;
 
-    color: #a78bfa;
+    color: #9f8dab;
 }
 
 /* ==========================================
@@ -615,109 +661,214 @@ header {
 ========================================== */
 
 .composer {
+
     margin-top: 15px;
 
     padding: 14px;
 
     border-radius: 18px;
 
-    background: rgba(5, 2, 15, 0.80);
-
-    border:
-        1px solid rgba(168, 85, 247, 0.35);
+    background:
+        rgba(8, 3, 20, 0.75);
 
     backdrop-filter: blur(15px);
 
-    box-shadow:
-        0 0 30px rgba(100, 20, 255, 0.10);
+    border:
+        1px solid
+        rgba(168, 85, 247, 0.38);
 }
 
 textarea {
+
     width: 100%;
 
-    min-height: 60px;
-    max-height: 180px;
+    min-height: 70px;
 
     resize: vertical;
 
     border: none;
+
     outline: none;
 
-    border-radius: 12px;
+    border-radius: 13px;
 
     padding: 14px;
 
-    background: rgba(20, 8, 35, 0.85);
+    background:
+        rgba(20, 8, 35, 0.9);
 
     color: white;
 
     font-size: 15px;
-
-    border:
-        1px solid rgba(168, 85, 247, 0.25);
 }
 
 textarea::placeholder {
-    color: #8b7ba8;
-}
-
-textarea:focus {
-    border-color: #a855f7;
-
-    box-shadow:
-        0 0 15px rgba(168, 85, 247, 0.25);
+    color: #897a97;
 }
 
 .buttons {
+
     display: flex;
 
     justify-content: flex-end;
 
-    gap: 9px;
+    gap: 10px;
 
     margin-top: 10px;
+
+    flex-wrap: wrap;
 }
 
 .buttons button {
-    border: none;
 
-    padding: 10px 16px;
+    border: 1px solid
+        rgba(168, 85, 247, 0.45);
+
+    background:
+        rgba(55, 15, 90, 0.75);
+
+    color: white;
+
+    padding:
+        10px 16px;
 
     border-radius: 10px;
 
     cursor: pointer;
 
-    font-weight: bold;
+    transition: 0.25s;
 
-    transition: 0.2s;
+    font-weight: bold;
 }
 
 .buttons button:hover {
+
     transform: translateY(-2px);
+
+    box-shadow:
+        0 0 18px
+        rgba(168, 85, 247, 0.4);
 }
 
-.kural {
-    background: #70ff9b;
-    color: #07100a;
-}
+.buttons .send {
 
-.send {
     background:
         linear-gradient(
             135deg,
             #9333ea,
             #6d28d9
         );
-
-    color: white;
-
-    box-shadow:
-        0 0 15px rgba(147, 51, 234, 0.35);
 }
 
-.buttons button:not(.kural):not(.send) {
-    background: rgba(80, 20, 130, 0.75);
+.buttons .kural {
+
+    background: #70ff9b;
+
+    color: #07100a;
+}
+
+/* ==========================================
+   MUSIC PANEL
+========================================== */
+
+.music-panel {
+
+    position: fixed;
+
+    right: 25px;
+
+    bottom: 95px;
+
+    width: 300px;
+
+    padding: 18px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(12, 4, 25, 0.94);
+
+    backdrop-filter: blur(18px);
+
+    border:
+        1px solid
+        rgba(168, 85, 247, 0.5);
+
+    box-shadow:
+        0 0 30px
+        rgba(124, 58, 237, 0.35);
+
+    transform:
+        translateY(30px)
+        scale(0.9);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: 0.3s;
+
+    z-index: 50;
+}
+
+.music-panel.active {
+
+    transform:
+        translateY(0)
+        scale(1);
+
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+.music-title {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    color: #d8a0ff;
+
+    margin-bottom: 10px;
+}
+
+.music-info {
+
+    color: #cbbbd9;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    margin-bottom: 15px;
+}
+
+.music-controls {
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+}
+
+.music-controls button {
+
+    border: 1px solid
+        rgba(168, 85, 247, 0.45);
+
+    background:
+        rgba(55, 15, 90, 0.8);
+
     color: white;
+
+    padding:
+        8px 11px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
 }
 
 /* ==========================================
@@ -725,18 +876,18 @@ textarea:focus {
 ========================================== */
 
 footer {
+
     text-align: center;
 
-    padding: 12px;
+    padding:
+        12px;
 
     font-size: 11px;
 
-    color: #9f8bbd;
+    color: #9d8da9;
 
-    background: rgba(5, 2, 12, 0.60);
-
-    border-top:
-        1px solid rgba(168, 85, 247, 0.18);
+    background:
+        rgba(5, 2, 12, 0.65);
 }
 
 /* ==========================================
@@ -746,7 +897,7 @@ footer {
 @media (max-width: 700px) {
 
     header {
-        padding: 13px;
+        padding: 12px;
     }
 
     .status {
@@ -757,86 +908,75 @@ footer {
         font-size: 20px;
     }
 
-    .icon-btn {
-        padding: 8px 9px;
-        font-size: 12px;
-    }
-
     .chat {
         width: 96%;
-        margin: 12px auto;
-    }
-
-    .messages {
-        padding: 14px;
     }
 
     .message {
-        max-width: 88%;
+        max-width: 90%;
+    }
+
+    .welcome h1 {
+        font-size: 28px;
     }
 
     .music-panel {
-        left: 12px;
-        right: 12px;
-        top: 85px;
+
+        right: 10px;
+        left: 10px;
+
         width: auto;
 
-        transform: translateY(-30px);
-    }
-
-    .music-panel.active {
-        transform: translateY(0);
-    }
-
-    .buttons {
-        flex-wrap: wrap;
-    }
-
-    .buttons button {
-        flex: 1;
-    }
-
-    .intro-logo {
-        font-size: 40px;
+        bottom: 80px;
     }
 }
+/* ==========================================
+   AURA THINKING ANIMATION
+========================================== */
+
+.aura-thinking-animation {
+    width: 55px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    border-radius: 8px;
+    margin: 4px 0;
+}
 </style>
+    <script src="https://js.puter.com/v2/"></script>
 </head>
 
 <body>
 
-<!-- ==========================================
-     PARTICLES
-========================================== -->
+<!-- PURPLE PARTICLES -->
 
 <div class="aura-particles">
 
     <div class="aura-particle"
-         style="left:10%;animation-delay:0s;"></div>
+         style="left:10%; animation-delay:0s;"></div>
 
     <div class="aura-particle"
-         style="left:25%;animation-delay:2s;"></div>
+         style="left:25%; animation-delay:2s;"></div>
 
     <div class="aura-particle"
-         style="left:40%;animation-delay:4s;"></div>
+         style="left:40%; animation-delay:4s;"></div>
 
     <div class="aura-particle"
-         style="left:55%;animation-delay:1s;"></div>
+         style="left:55%; animation-delay:1s;"></div>
 
     <div class="aura-particle"
-         style="left:70%;animation-delay:3s;"></div>
+         style="left:70%; animation-delay:3s;"></div>
 
     <div class="aura-particle"
-         style="left:85%;animation-delay:5s;"></div>
+         style="left:85%; animation-delay:5s;"></div>
 
     <div class="aura-particle"
-         style="left:95%;animation-delay:6s;"></div>
+         style="left:95%; animation-delay:6s;"></div>
 
 </div>
 
-<!-- ==========================================
-     INTRO
-========================================== -->
+
+<!-- INTRO -->
 
 <div id="auraIntro">
 
@@ -852,9 +992,8 @@ footer {
 
 </div>
 
-<!-- ==========================================
-     APP
-========================================== -->
+
+<!-- APP -->
 
 <div class="app">
 
@@ -875,6 +1014,7 @@ footer {
 
     </div>
 
+
     <div class="top-actions">
 
         <div class="status">
@@ -884,15 +1024,13 @@ footer {
         <button
             class="icon-btn"
             onclick="newChat()"
-            title="New Chat"
         >
-            ＋
+            ＋ New
         </button>
 
         <button
             class="icon-btn"
             onclick="clearHistory()"
-            title="Clear History"
         >
             🗑️
         </button>
@@ -908,9 +1046,8 @@ footer {
 
 </header>
 
-<!-- ==========================================
-     MUSIC
-========================================== -->
+
+<!-- MUSIC -->
 
 <div
     class="music-panel"
@@ -928,7 +1065,10 @@ footer {
         Music mode ready
     </div>
 
-    <div class="music-controls">
+    <div
+        class="music-controls"
+        id="musicControls"
+    >
 
         <button onclick="playOnYouTube()">
             ▶️ YouTube
@@ -936,10 +1076,6 @@ footer {
 
         <button onclick="playOnSpotify()">
             🎧 Spotify
-        </button>
-
-        <button onclick="speakMusicArtist()">
-            🔊 Artist
         </button>
 
         <button onclick="closeMusicMode()">
@@ -950,9 +1086,8 @@ footer {
 
 </div>
 
-<!-- ==========================================
-     CHAT
-========================================== -->
+
+<!-- CHAT -->
 
 <section class="chat">
 
@@ -978,7 +1113,6 @@ footer {
 
     </div>
 
-    <!-- COMPOSER -->
 
     <div class="composer">
 
@@ -987,18 +1121,17 @@ footer {
             placeholder="Ask AURA anything..."
         ></textarea>
 
+
         <div class="buttons">
 
             <button
                 class="kural"
-                onclick="toggleKural()"
+                id="kuralButton"
             >
                 🎙️ Kural
             </button>
 
-            <button
-                onclick="musicMode()"
-            >
+            <button onclick="musicMode()">
                 🎵 Music
             </button>
 
@@ -1015,11 +1148,13 @@ footer {
 
 </section>
 
+
 <footer>
     AURA V9 • Ollama AI • Persistent User Data
 </footer>
 
 </div>
+<script src="https://js.puter.com/v2/"></script>
 
 <script>
 
@@ -1034,16 +1169,6 @@ if (!USER_ID) {
     window.location.href = "/login.html";
 }
 
-/* ==========================================
-   LOGOUT
-========================================== */
-
-function logout() {
-
-    localStorage.removeItem("auraUser");
-
-    window.location.href = "/login.html";
-}
 
 /* ==========================================
    PROFILE
@@ -1078,8 +1203,9 @@ async function loadProfile() {
     }
 }
 
+
 /* ==========================================
-   MESSAGE
+   ADD MESSAGE
 ========================================== */
 
 function addMessage(
@@ -1104,8 +1230,7 @@ function addMessage(
     div.className =
         `message ${type}`;
 
-    div.textContent =
-        text;
+    div.innerHTML= text;
 
     if (time) {
 
@@ -1118,9 +1243,7 @@ function addMessage(
         timeElement.textContent =
             new Date(time).toLocaleString();
 
-        div.appendChild(
-            timeElement
-        );
+        div.appendChild(timeElement);
     }
 
     messages.appendChild(div);
@@ -1128,6 +1251,7 @@ function addMessage(
     messages.scrollTop =
         messages.scrollHeight;
 }
+
 
 /* ==========================================
    LOAD HISTORY
@@ -1145,9 +1269,7 @@ async function loadHistory() {
         const data =
             await response.json();
 
-        if (!data.success) {
-            return;
-        }
+        if (!data.success) return;
 
         const messages =
             document.getElementById("messages");
@@ -1160,36 +1282,26 @@ async function loadHistory() {
         ) {
 
             messages.innerHTML = `
-                <div
-                    class="welcome"
-                    id="welcome"
-                >
-                    <h1>
-                        Welcome back 🤖
-                    </h1>
-
-                    <p>
-                        Your AURA conversation is ready.
-                    </p>
+                <div class="welcome" id="welcome">
+                    <h1>Welcome back 🤖</h1>
+                    <p>Your AURA conversation is ready.</p>
                 </div>
             `;
 
             return;
         }
 
-        data.history.forEach(
-            item => {
+        data.history.forEach(item => {
 
-                addMessage(
-                    item.content,
-                    item.role === "user"
-                        ? "user"
-                        : "aura",
-                    item.time
-                );
+            addMessage(
+                item.content,
+                item.role === "user"
+                    ? "user"
+                    : "aura",
+                item.time
+            );
 
-            }
-        );
+        });
 
     } catch (error) {
 
@@ -1199,6 +1311,7 @@ async function loadHistory() {
         );
     }
 }
+
 
 /* ==========================================
    NEW CHAT
@@ -1239,23 +1352,12 @@ async function newChat() {
             return;
         }
 
-        const messages =
-            document.getElementById(
-                "messages"
-            );
-
-        messages.innerHTML = `
-            <div
-                class="welcome"
-                id="welcome"
-            >
-                <h1>
-                    Vaanga, Vanakkam! 👋
-                </h1>
-
-                <p>
-                    New AURA conversation started.
-                </p>
+        document.getElementById(
+            "messages"
+        ).innerHTML = `
+            <div class="welcome" id="welcome">
+                <h1>Vaanga, Vanakkam! 👋</h1>
+                <p>New AURA conversation started.</p>
             </div>
         `;
 
@@ -1272,6 +1374,7 @@ async function newChat() {
     }
 }
 
+
 /* ==========================================
    CLEAR HISTORY
 ========================================== */
@@ -1283,9 +1386,7 @@ async function clearHistory() {
             "Clear all your AURA chat history?"
         );
 
-    if (!confirmed) {
-        return;
-    }
+    if (!confirmed) return;
 
     try {
 
@@ -1329,117 +1430,41 @@ async function clearHistory() {
     }
 }
 
+
 /* ==========================================
    CHAT
 ========================================== */
 
+
 async function sendChat() {
 
-    const input =
-        document.getElementById(
-            "prompt"
-        );
+    const input = document.getElementById("prompt");
+    const message = input.value.trim();
 
-    const message =
-        input.value.trim();
+    if (!message) return;
 
-    if (!message) {
-        return;
-    }
+    // Show user message
+    addMessage(message, "user");
 
-    /* PLAY COMMAND */
-
-    if (
-        message
-            .toLowerCase()
-            .startsWith("play ")
-    ) {
-
-        const query =
-            message
-                .replace(/^play song /i, "")
-                .replace(/^play /i, "")
-                .trim();
-
-        if (query) {
-
-            document
-                .getElementById(
-                    "musicPanel"
-                )
-                .classList.add("active");
-
-            document
-                .getElementById(
-                    "musicInfo"
-                )
-                .textContent =
-                    `🎵 Searching for "${query}"...`;
-
-            const youtubeUrl =
-                "https://www.youtube.com/results?search_query=" +
-                encodeURIComponent(query);
-
-            window.open(
-                youtubeUrl,
-                "_blank"
-            );
-
-            return;
-        }
-    }
-
-    addMessage(
-        message,
-        "user"
-    );
-
+    // Clear input immediately
     input.value = "";
-
-    addMessage(
-        "AURA is thinking...",
-        "aura"
-    );
 
     try {
 
-        const response =
-            await fetch(
-                "/api/chat",
-                {
-                    method: "POST",
+        const response = await fetch("/api/chat", {
+            method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-                    body: JSON.stringify({
-                        userId: USER_ID,
-                        message: message
-                    })
-                }
-            );
+            body: JSON.stringify({
+                userId: USER_ID,
+                message: message
+            })
+        });
 
-        const data =
-            await response.json();
-
-        const messages =
-            document.getElementById(
-                "messages"
-            );
-
-        const thinking =
-            messages.querySelectorAll(
-                ".aura"
-            );
-
-        if (thinking.length) {
-
-            thinking[
-                thinking.length - 1
-            ].remove();
-        }
+        const data = await response.json();
 
         if (data.success) {
 
@@ -1449,45 +1474,22 @@ async function sendChat() {
                 new Date().toISOString()
             );
 
+            // Voice reply if Kural is ON
             if (voiceEnabled) {
-
-                speak(
-                    data.reply
-                );
+                speak(data.reply);
             }
 
         } else {
 
             addMessage(
-                data.error ||
-                "Something went wrong.",
+                data.error || "Something went wrong.",
                 "aura"
             );
         }
 
     } catch (error) {
 
-        console.error(
-            "Chat error:",
-            error
-        );
-
-        const messages =
-            document.getElementById(
-                "messages"
-            );
-
-        const thinking =
-            messages.querySelectorAll(
-                ".aura"
-            );
-
-        if (thinking.length) {
-
-            thinking[
-                thinking.length - 1
-            ].remove();
-        }
+        console.error("Chat error:", error);
 
         addMessage(
             "❌ Cannot connect to AURA server.",
@@ -1495,9 +1497,8 @@ async function sendChat() {
         );
     }
 }
-
 /* ==========================================
-   KURAL
+   KURAL VOICE
 ========================================== */
 
 let voiceEnabled = false;
@@ -1506,54 +1507,6 @@ let recognition = null;
 
 let listening = false;
 
-function toggleKural() {
-
-    voiceEnabled =
-        !voiceEnabled;
-
-    const button =
-        document.querySelector(
-            ".kural"
-        );
-
-    if (voiceEnabled) {
-
-        button.textContent =
-            "🎙️ Kural ON";
-
-        speak(
-            `Vanakkam ${USER_ID}. Sollunga.`
-        );
-
-        setTimeout(
-            () => {
-                startKuralListening();
-            },
-            700
-        );
-
-    } else {
-
-        button.textContent =
-            "🎙️ Kural";
-
-        if (
-            "speechSynthesis"
-            in window
-        ) {
-
-            speechSynthesis.cancel();
-        }
-
-        if (
-            recognition &&
-            listening
-        ) {
-
-            recognition.stop();
-        }
-    }
-}
 
 function speak(text) {
 
@@ -1579,9 +1532,44 @@ function speak(text) {
     );
 }
 
-/* ==========================================
-   VOICE INPUT
-========================================== */
+
+function updateKuralButton(
+    active
+) {
+
+    const button =
+        document.getElementById(
+            "kuralButton"
+        );
+
+    if (!button) return;
+
+    if (active) {
+
+        button.textContent =
+            "🔴 Listening...";
+
+        button.style.background =
+            "#ff5252";
+
+        button.style.color =
+            "white";
+
+    } else {
+
+        button.textContent =
+            voiceEnabled
+                ? "🎙️ Kural ON"
+                : "🎙️ Kural";
+
+        button.style.background =
+            "#70ff9b";
+
+        button.style.color =
+            "#07100a";
+    }
+}
+
 
 function startKuralListening() {
 
@@ -1592,7 +1580,7 @@ function startKuralListening() {
     if (!SpeechRecognition) {
 
         alert(
-            "Voice input is not supported in this browser. Please use Chrome."
+            "Voice input is not supported. Please use Chrome."
         );
 
         return;
@@ -1619,17 +1607,8 @@ function startKuralListening() {
 
     listening = true;
 
-    updateKuralButton(
-        true
-    );
+    updateKuralButton(true);
 
-    recognition.onstart =
-        function() {
-
-            updateKuralButton(
-                true
-            );
-        };
 
     recognition.onresult =
         function(event) {
@@ -1647,8 +1626,7 @@ function startKuralListening() {
                         .transcript;
 
                 if (
-                    event.results[i]
-                        .isFinal
+                    event.results[i].isFinal
                 ) {
 
                     finalText +=
@@ -1665,75 +1643,56 @@ function startKuralListening() {
             }
         };
 
+
     recognition.onerror =
         function(event) {
 
             console.error(
-                "Kural voice error:",
+                "Kural error:",
                 event.error
             );
 
             listening = false;
 
-            updateKuralButton(
-                false
-            );
+            updateKuralButton(false);
         };
+
 
     recognition.onend =
         function() {
 
             listening = false;
 
-            updateKuralButton(
-                false
-            );
+            updateKuralButton(false);
         };
+
 
     recognition.start();
 }
 
-function updateKuralButton(
-    active
-) {
 
-    const button =
-        document.querySelector(
-            ".kural"
-        );
+document
+    .getElementById("kuralButton")
+    .addEventListener(
+        "click",
+        function() {
 
-    if (!button) {
-        return;
-    }
+            if (!voiceEnabled) {
 
-    if (active) {
+                voiceEnabled = true;
 
-        button.textContent =
-            "🔴 Kural Listening...";
+                speak(
+                    `Vanakkam ${USER_ID}. Sollunga.`
+                );
+            }
 
-        button.style.background =
-            "#ff5252";
+            startKuralListening();
+        }
+    );
 
-        button.style.color =
-            "white";
-
-    } else {
-
-        button.textContent =
-            voiceEnabled
-                ? "🎙️ Kural ON"
-                : "🎙️ Kural";
-
-        button.style.background =
-            "#70ff9b";
-
-        button.style.color =
-            "#07100a";
-    }
-}
 
 /* ==========================================
-   MUSIC MODE
+   MUSIC
 ========================================== */
 
 function musicMode() {
@@ -1750,8 +1709,9 @@ function musicMode() {
     document.getElementById(
         "musicInfo"
     ).textContent =
-        "🎵 Type a song name, then choose YouTube or Spotify.";
+        "🎵 Type a song name in the chat box, then choose YouTube or Spotify.";
 }
+
 
 function getMusicQuery() {
 
@@ -1776,14 +1736,13 @@ function getMusicQuery() {
     return query;
 }
 
+
 function playOnYouTube() {
 
     const query =
         getMusicQuery();
 
-    if (!query) {
-        return;
-    }
+    if (!query) return;
 
     const url =
         "https://www.youtube.com/results?search_query=" +
@@ -1800,14 +1759,13 @@ function playOnYouTube() {
     );
 }
 
+
 function playOnSpotify() {
 
     const query =
         getMusicQuery();
 
-    if (!query) {
-        return;
-    }
+    if (!query) return;
 
     const url =
         "https://open.spotify.com/search/" +
@@ -1824,19 +1782,6 @@ function playOnSpotify() {
     );
 }
 
-function speakMusicArtist() {
-
-    const query =
-        getMusicQuery();
-
-    if (!query) {
-        return;
-    }
-
-    speak(
-        `Searching music for ${query}`
-    );
-}
 
 function closeMusicMode() {
 
@@ -1848,6 +1793,22 @@ function closeMusicMode() {
             "active"
         );
 }
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+function logout() {
+
+    localStorage.removeItem(
+        "auraUser"
+    );
+
+    window.location.href =
+        "/login.html";
+}
+
 
 /* ==========================================
    ENTER KEY
@@ -1871,6 +1832,7 @@ document
         }
     );
 
+
 /* ==========================================
    START
 ========================================== */
@@ -1882,4 +1844,5 @@ loadHistory();
 </script>
 
 </body>
+
 </html>
