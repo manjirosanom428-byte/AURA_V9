@@ -380,63 +380,65 @@ app.post("/api/chat", async (req, res) => {
                 }));
 
         /* ==========================================
-           OLLAMA
+           AI PROVIDER
+           Cloud deployment: set OPENAI_API_KEY in the host's
+           environment settings. Never put keys in browser code.
+           Local development fallback: Ollama on this machine.
         ========================================== */
 
-        const ollamaResponse =
-            await fetch(
-                "http://127.0.0.1:11434/api/chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        model: "qwen2.5:1.5b",
-                        stream: false,
-
-                        messages: [
-                            {
-                                role: "system",
-
-                                content: `
+        const systemMessage = {
+            role: "system",
+            content: `
 You are AURA V9, the user's personal AI assistant.
-
 The user's name is ${userName}.
-
 Be friendly, helpful and natural.
-
 If the user speaks English, reply in English.
 If the user speaks Tamil, reply in Tamil.
 If the user speaks Tanglish, reply in Tanglish.
 If the user mixes Tamil and English, reply naturally in the same style.
-
-Answer the actual question.
-Do not give random fixed responses.
+Answer the actual question. Do not give random fixed responses.
 `
-                            },
+        };
 
-                            ...recentHistory
-                        ]
-                    })
-                }
-            );
+        let reply = "";
 
-        const data =
-            await ollamaResponse.json();
-
-        if (!ollamaResponse.ok) {
-            throw new Error(
-                data.error ||
-                "Ollama request failed."
-            );
+        if (process.env.OPENAI_API_KEY) {
+            const baseUrl = (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+            const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+            const aiResponse = await fetch(`${baseUrl}/chat/completions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model,
+                    messages: [systemMessage, ...recentHistory],
+                    temperature: 0.7
+                })
+            });
+            const aiData = await aiResponse.json().catch(() => ({}));
+            if (!aiResponse.ok) {
+                console.error("Cloud AI provider error:", aiData.error?.message || aiResponse.status);
+                throw new Error(aiData.error?.message || `AI provider returned ${aiResponse.status}`);
+            }
+            reply = aiData.choices?.[0]?.message?.content?.trim() || "AURA could not generate a response.";
+        } else {
+            const ollamaResponse = await fetch("http://127.0.0.1:11434/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: process.env.OLLAMA_MODEL || "qwen2.5:1.5b",
+                    stream: false,
+                    messages: [systemMessage, ...recentHistory]
+                })
+            });
+            const data = await ollamaResponse.json().catch(() => ({}));
+            if (!ollamaResponse.ok) {
+                throw new Error(data.error || "Ollama request failed.");
+            }
+            reply = data.message?.content?.trim() || "AURA could not generate a response.";
         }
-
-        const reply =
-            data.message?.content ||
-            "AURA could not generate a response.";
 
         history.push({
             role: "assistant",

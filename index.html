@@ -942,11 +942,36 @@ footer {
     border-radius: 8px;
     margin: 4px 0;
 }
+
+/* AURA V9 response energy overlay */
+.hollow-purple-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(5,2,12,.30);overflow:hidden;pointer-events:none}
+.hollow-purple-overlay.active{display:flex;animation:hpFadeIn .25s ease-out}
+.hp-core{position:relative;width:min(78vw,340px);height:min(78vw,340px);filter:drop-shadow(0 0 24px #a855f7)}
+.hp-orb{position:absolute;top:35%;width:38%;height:38%;border-radius:50%;mix-blend-mode:screen;animation:hpFloat 1.2s ease-in-out infinite alternate}
+.hp-red{left:8%;background:radial-gradient(circle at 35% 35%,#fff 0%,#ff7b7b 10%,#ff1744 34%,#9b001e 70%,transparent 72%);box-shadow:0 0 28px #ff1744}
+.hp-blue{right:8%;background:radial-gradient(circle at 35% 35%,#fff 0%,#9eeaff 10%,#168cff 34%,#1426b8 70%,transparent 72%);box-shadow:0 0 28px #168cff;animation-delay:.12s}
+.hp-purple{position:absolute;left:35%;top:30%;width:30%;height:40%;border-radius:50%;background:radial-gradient(circle,#fff 0%,#e9b5ff 12%,#b000ff 42%,#5b00d6 65%,transparent 74%);opacity:0;transform:scale(.2)}
+.hollow-purple-overlay.merging .hp-red{transform:translateX(62%);transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.hollow-purple-overlay.merging .hp-blue{transform:translateX(-62%);transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.hollow-purple-overlay.merging .hp-purple{opacity:1;transform:scale(1.7);transition:all .35s ease-out .25s;animation:hpPulse .7s ease-in-out infinite alternate}
+.hp-label{position:absolute;top:calc(50% + min(35vw,150px));font:700 12px Arial,sans-serif;letter-spacing:4px;color:#f3dcff;text-shadow:0 0 12px #a000ff}
+@keyframes hpFloat{to{transform:translateY(-12px) scale(1.06)}}@keyframes hpPulse{to{filter:brightness(1.7);transform:scale(1.9)}}@keyframes hpFadeIn{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.hp-orb,.hp-purple{animation:none!important;transition:none!important}}
+
 </style>
     <script src="https://js.puter.com/v2/"></script>
+<link rel="manifest" href="/aura.webmanifest">
+<meta name="theme-color" content="#0b0b12">
+<meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 
 <body>
+
+<div id="hollowPurpleOverlay" class="hollow-purple-overlay" aria-hidden="true">
+  <div class="hp-core"><div class="hp-orb hp-red"></div><div class="hp-orb hp-blue"></div><div class="hp-purple"></div></div>
+  <div class="hp-label">AURA IS THINKING</div>
+</div>
+
 
 <!-- PURPLE PARTICLES -->
 
@@ -1386,6 +1411,14 @@ async function clearHistory() {
    CHAT
 ========================= */
 
+
+function startHollowPurple(){
+ const el=document.getElementById("hollowPurpleOverlay"); if(!el) return;
+ el.classList.remove("merging","active"); void el.offsetWidth; el.classList.add("active");
+ window.setTimeout(()=>el.classList.add("merging"),180);
+}
+function stopHollowPurple(){const el=document.getElementById("hollowPurpleOverlay"); if(el) el.classList.remove("active","merging");}
+
 async function sendChat() {
     const input =
         document.getElementById("prompt");
@@ -1432,6 +1465,7 @@ async function sendChat() {
     input.value = "";
 
     showThinking();
+    startHollowPurple();
 
     try {
 
@@ -1506,6 +1540,10 @@ async function sendChat() {
                 "aura"
             );
         }
+    } finally {
+        // Keep Hollow Purple visible while either server AI or Puter fallback responds.
+        hideThinking();
+        stopHollowPurple();
     }
 }
 
@@ -1863,6 +1901,11 @@ document
             }
         }
     );
+
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js").catch(err => console.warn("AURA offline shell unavailable:", err)));
+}
 
 /* =========================
    START

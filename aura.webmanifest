@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "AURA V9 AI Assistant",
+  "short_name": "AURA V9",
+  "description": "AURA V9 personal AI assistant",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0b12",
+  "theme_color": "#0b0b12",
+  "icons": [
+    { "src": "/aura-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
