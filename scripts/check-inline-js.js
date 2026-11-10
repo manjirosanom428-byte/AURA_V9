@@ -11,7 +11,7 @@ if (scripts.length === 0) {
 }
 
 scripts.forEach((source, index) => {
-  new vm.Script(source, { filename: \`index.html:inline-script-\${index + 1}\` });
+  new vm.Script(source, { filename: "index.html:inline-script-" + (index + 1) });
 });
 
-console.log(\`Checked \${scripts.length} inline JavaScript block(s) in index.html.\`);
+console.log("Checked " + scripts.length + " inline JavaScript block(s) in index.html.");
