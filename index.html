@@ -3,9 +3,10 @@
 
 <head>
 <script src="https://js.puter.com/v2/"></script>
-<script type="module">
-  import { SpeechRecognition } from "https://esm.sh/@capacitor-community/speech-recognition";
-  window.AuraNativeSpeechRecognition = SpeechRecognition;
+<script>
+  import("https://esm.sh/@capacitor-community/speech-recognition").then(({ SpeechRecognition }) => {
+    window.AuraNativeSpeechRecognition = SpeechRecognition;
+  }).catch(error => console.warn("Native speech plugin unavailable:", error));
 </script>
 <meta charset="UTF-8">
 
