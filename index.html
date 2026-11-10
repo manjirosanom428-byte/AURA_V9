@@ -1908,8 +1908,75 @@ function getVoiceLocale() {
     return selected === "auto" ? detectTextLanguage(getLastUserMessage()) : selected;
 }
 
+async function startNativeVoiceRecognition() {
+    if (!callMode || callBusy) return;
+    const NativeSpeech = window.AuraNativeSpeechRecognition;
+    callBusy = true;
+    try {
+        const permission = await NativeSpeech.requestPermissions();
+        if (permission.speechRecognition !== "granted") {
+            setVoiceCallUI(true, "Allow speech recognition permission to continue.");
+            callBusy = false;
+            return;
+        }
+        setVoiceCallUI(true, "Listening...");
+        const language = getVoiceLocale();
+        const result = await NativeSpeech.start({
+            language,
+            maxResults: 1,
+            partialResults: false,
+            popup: false
+        });
+        const spokenText = result && result.matches && result.matches[0]
+            ? String(result.matches[0]).trim()
+            : "";
+        if (!spokenText || !callMode) {
+            callBusy = false;
+            if (callMode) setTimeout(startVoiceRecognition, 400);
+            return;
+        }
+        addMessage(spokenText, "user");
+        setVoiceCallUI(true, "AURA is thinking...");
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: USER_ID, message: spokenText })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success || !data.reply) {
+            throw new Error(data.error || "AURA could not reply.");
+        }
+        addMessage(data.reply, "aura", new Date().toISOString());
+        callBusy = false;
+        if (!callMode) return;
+        if (!("speechSynthesis" in window)) {
+            setVoiceCallUI(true, "Reply shown in chat. Listening...");
+            setTimeout(startVoiceRecognition, 400);
+            return;
+        }
+        const utterance = new SpeechSynthesisUtterance(data.reply);
+        utterance.lang = detectTextLanguage(data.reply);
+        utterance.onend = () => { if (callMode) startVoiceRecognition(); };
+        utterance.onerror = () => { if (callMode) startVoiceRecognition(); };
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+        setVoiceCallUI(true, "AURA is speaking...");
+    } catch (error) {
+        console.error("Native AURA call error:", error);
+        callBusy = false;
+        if (callMode) {
+            setVoiceCallUI(true, "Voice call issue: " + error.message);
+            setTimeout(startVoiceRecognition, 900);
+        }
+    }
+}
+
 function startVoiceRecognition() {
     if (!callMode || callBusy) return;
+    if (window.Capacitor && window.AuraNativeSpeechRecognition) {
+        startNativeVoiceRecognition();
+        return;
+    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         addMessage("Voice conversation needs a browser with Speech Recognition support. Try Chrome.", "aura");
@@ -2016,6 +2083,7 @@ function toggleVoiceCall() {
 
 function endVoiceCall() {
     callMode = false;
+    if (window.AuraNativeSpeechRecognition) window.AuraNativeSpeechRecognition.stop().catch(() => {});
     callBusy = false;
     if (callRecognition) {
         callRecognition.onend = null;
