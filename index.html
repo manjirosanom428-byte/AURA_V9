@@ -1917,7 +1917,7 @@ function startVoiceRecognition() {
         }
     };
     callRecognition.onend = function() {
-        if (callMode && !callBusy && !speechSynthesis.speaking) {
+        if (callMode && !callBusy && !(window.speechSynthesis && speechSynthesis.speaking)) {
             setTimeout(() => {
                 if (callMode && !callBusy) startVoiceRecognition();
             }, 350);
