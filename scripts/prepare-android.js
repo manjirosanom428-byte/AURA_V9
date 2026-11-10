@@ -35,7 +35,7 @@ for (const file of ["index.html", "login.html", "intro.html"]) {
   const target = path.join(webDir, file);
   let html = fs.readFileSync(target, "utf8");
   if (!html.includes("aura-config.js")) {
-    html = html.replace("</head>", '  <script src="./aura-config.js"></script>\\n</head>');
+    html = html.replace("</head>", '  <script src="./aura-config.js"></script>\n</head>');
   }
   fs.writeFileSync(target, html, "utf8");
 }
@@ -44,6 +44,6 @@ const manifestPath = path.join(webDir, "aura.webmanifest");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 manifest.start_url = "./intro.html";
 manifest.scope = "./";
-fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\\n");
+fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
 console.log("Prepared local AURA V9 web assets for Android. API endpoint:", backendUrl);
