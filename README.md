@@ -40,3 +40,16 @@ If no cloud API key is configured, the server attempts local Ollama at `127.0.0.
 
 ## Privacy
 Do not upload confidential documents or sensitive personal information until the production-security and data-storage limitations above are addressed.
+
+## Android APK build (prepared)
+
+The repository includes a Capacitor configuration and a manual GitHub Actions workflow at **Actions → Build AURA V9 Android APK → Run workflow**.
+
+1. Enter the HTTPS URL of the deployed AURA V9 backend when starting the workflow.
+2. Wait for the Android build to finish.
+3. Open the workflow run and download the `AURA-V9-Android-debug` artifact.
+4. Extract the artifact ZIP to obtain `app-debug.apk`.
+
+The workflow packages the current website files into a local Android app shell and routes `/api/*` requests to the backend URL supplied at build time. A real deployed backend URL is required; do not use a guessed or expired URL.
+
+This produces a **debug/testing APK**, not a Play Store release. A signed release build, native microphone/wake-word service, floating overlay, contacts integration and full device testing are separate tasks. Browser Speech Recognition may not be available in Android WebView, so Better Call must be tested and may need a native speech plugin.
