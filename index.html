@@ -1921,6 +1921,28 @@ function getVoiceLocale() {
     return selected === "auto" ? detectTextLanguage(getLastUserMessage()) : selected;
 }
 
+async function getVoiceReply(message) {
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: USER_ID, message })
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success || !data.reply) {
+            throw new Error(data.error || "AURA backend could not reply.");
+        }
+        return String(data.reply);
+    } catch (backendError) {
+        console.warn("Voice backend unavailable; trying Puter:", backendError);
+        if (!window.puter || !puter.ai) throw backendError;
+        const result = await puter.ai.chat(message, { model: "gpt-4o-mini" });
+        const reply = result?.message?.content || result?.content || String(result || "");
+        if (!reply.trim()) throw new Error("Puter returned an empty reply.");
+        return reply;
+    }
+}
+
 async function startNativeVoiceRecognition() {
     if (!callMode || callBusy) return;
     const NativeSpeech = window.AuraNativeSpeechRecognition;
@@ -1950,16 +1972,8 @@ async function startNativeVoiceRecognition() {
         }
         addMessage(spokenText, "user");
         setVoiceCallUI(true, "AURA is thinking...");
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: USER_ID, message: spokenText })
-        });
-        const data = await response.json();
-        if (!response.ok || !data.success || !data.reply) {
-            throw new Error(data.error || "AURA could not reply.");
-        }
-        addMessage(data.reply, "aura", new Date().toISOString());
+        const reply = await getVoiceReply(spokenText);
+        addMessage(reply, "aura", new Date().toISOString());
         callBusy = false;
         if (!callMode) return;
         if (!("speechSynthesis" in window)) {
@@ -1967,8 +1981,8 @@ async function startNativeVoiceRecognition() {
             setTimeout(startVoiceRecognition, 400);
             return;
         }
-        const utterance = new SpeechSynthesisUtterance(data.reply);
-        utterance.lang = detectTextLanguage(data.reply);
+        const utterance = new SpeechSynthesisUtterance(reply);
+        utterance.lang = detectTextLanguage(reply);
         utterance.onend = () => { if (callMode) startVoiceRecognition(); };
         utterance.onerror = () => { if (callMode) startVoiceRecognition(); };
         speechSynthesis.cancel();
@@ -2011,16 +2025,8 @@ function startVoiceRecognition() {
         addMessage(spokenText, "user");
         setVoiceCallUI(true, "AURA is thinking...");
         try {
-            const response = await fetch("/api/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId: USER_ID, message: spokenText })
-            });
-            const data = await response.json();
-            if (!response.ok || !data.success || !data.reply) {
-                throw new Error(data.error || "AURA could not reply.");
-            }
-            addMessage(data.reply, "aura", new Date().toISOString());
+            const reply = await getVoiceReply(spokenText);
+            addMessage(reply, "aura", new Date().toISOString());
             if (!("speechSynthesis" in window)) {
                 setVoiceCallUI(true, "Reply shown in chat. Voice playback is unavailable.");
                 callBusy = false;
@@ -2028,8 +2034,8 @@ function startVoiceRecognition() {
                 return;
             }
             speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(data.reply);
-            utterance.lang = detectTextLanguage(data.reply);
+            const utterance = new SpeechSynthesisUtterance(reply);
+            utterance.lang = detectTextLanguage(reply);
             utterance.rate = 1;
             utterance.pitch = 1;
             utterance.onend = function() {
