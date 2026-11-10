@@ -4,9 +4,15 @@
 <head>
 <script src="https://js.puter.com/v2/"></script>
 <script>
-  import("https://esm.sh/@capacitor-community/speech-recognition").then(({ SpeechRecognition }) => {
-    window.AuraNativeSpeechRecognition = SpeechRecognition;
-  }).catch(error => console.warn("Native speech plugin unavailable:", error));
+  window.AuraSpeechPluginReady = import("https://esm.sh/@capacitor-community/speech-recognition")
+    .then(({ SpeechRecognition }) => {
+      window.AuraNativeSpeechRecognition = SpeechRecognition;
+      return SpeechRecognition;
+    })
+    .catch(error => {
+      console.warn("Native speech plugin unavailable; browser speech will be used:", error);
+      return null;
+    });
 </script>
 <meta charset="UTF-8">
 
@@ -16,6 +22,9 @@
 >
 
 <title>AURA V9</title>
+<link rel="icon" type="image/svg+xml" href="./aura-icon.svg">
+<link rel="apple-touch-icon" href="./aura-icon.svg">
+<meta name="theme-color" content="#0b0b12">
 
 <style>
 .aura-thinking-animation {
@@ -1043,7 +1052,8 @@ footer {
 
     <div>
 
-        <div class="logo">
+        <div class="logo" style="display:flex;align-items:center;gap:10px">
+            <img src="./aura-icon.svg" alt="AURA V9 app logo" width="42" height="42" style="border-radius:11px;object-fit:cover">
             AURA V9
         </div>
 
@@ -1243,7 +1253,8 @@ footer {
 </div>
 <script src="https://js.puter.com/v2/"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"
+  onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js'"></script>
 <script>
 const USER_ID = localStorage.getItem("auraUser");
 
@@ -1756,7 +1767,8 @@ function updateKuralButton(active) {
 
 async function startKuralListening() {
 
-    const NativeSpeech = window.AuraNativeSpeechRecognition;
+    const NativeSpeech = window.AuraNativeSpeechRecognition ||
+        (window.AuraSpeechPluginReady ? await window.AuraSpeechPluginReady : null);
     if (window.Capacitor && NativeSpeech) {
         try {
             const permission = await NativeSpeech.requestPermissions();
@@ -2066,15 +2078,17 @@ function startVoiceRecognition() {
     }
 }
 
-function toggleVoiceCall() {
+async function toggleVoiceCall() {
     if (callMode) {
         endVoiceCall();
         return;
     }
-    const hasNativeSpeech = Boolean(window.Capacitor && window.AuraNativeSpeechRecognition);
+    const NativeSpeech = window.AuraNativeSpeechRecognition ||
+        (window.AuraSpeechPluginReady ? await window.AuraSpeechPluginReady : null);
+    const hasNativeSpeech = Boolean(window.Capacitor && NativeSpeech);
     const hasWebSpeech = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
     if (!hasNativeSpeech && !hasWebSpeech) {
-        addMessage("Better Call needs microphone permission and a supported speech-recognition browser. Open this HTTPS site in Chrome and allow Microphone.", "aura");
+        addMessage("Voice calling is unavailable here. Allow microphone permission, or open AURA V9 in Chrome.", "aura");
         return;
     }
     callMode = true;
@@ -2134,9 +2148,9 @@ document.getElementById("pdfFile").addEventListener("change", async function(eve
   }
   try {
     status.textContent="Reading PDF on this device...";
-    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    // Disable the external worker: mobile WebViews may block worker CDN requests.
     const bytes=await file.arrayBuffer();
-    const pdf=await pdfjsLib.getDocument({data:bytes}).promise;
+    const pdf=await pdfjsLib.getDocument({data:bytes, disableWorker:true, isEvalSupported:false}).promise;
     let pages=[];
     for(let pageNo=1;pageNo<=Math.min(pdf.numPages,80);pageNo++) {
       const page=await pdf.getPage(pageNo);
@@ -2160,18 +2174,28 @@ async function askAURAWithContext(promptText) {
   showThinking();
   startHollowPurple();
   try {
-    const response=await fetch("/api/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({userId:USER_ID,message})
-    });
-    const data=await response.json();
-    if(!response.ok || !data.success || !data.reply) throw new Error(data.error||"AURA could not answer.");
-    addMessage(data.reply,"aura",new Date().toISOString());
-    if(voiceEnabled) speak(data.reply);
+    let reply = "";
+    try {
+      const response=await fetch("/api/chat",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({userId:USER_ID,message})
+      });
+      const data=await response.json();
+      if(!response.ok || !data.success || !data.reply) throw new Error(data.error||"Backend unavailable");
+      reply = data.reply;
+    } catch (backendError) {
+      console.warn("AURA backend unavailable for document context; trying Puter:", backendError);
+      if (!window.puter || !puter.ai) throw backendError;
+      const result = await puter.ai.chat(message, {model:"gpt-4o-mini"});
+      reply = result?.message?.content || result?.content || String(result || "");
+    }
+    if(!reply.trim()) throw new Error("AURA returned an empty response.");
+    addMessage(reply,"aura",new Date().toISOString());
+    if(voiceEnabled) speak(reply);
   } catch(error) {
     console.error("Context question failed:",error);
-    addMessage("AURA connection failed: "+error.message,"aura");
+    addMessage("AURA could not process this document: "+error.message,"aura");
   } finally {
     hideThinking();
     stopHollowPurple();
