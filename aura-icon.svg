@@ -1,6 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
- <rect width="512" height="512" rx="112" fill="#0b0b12"/>
- <circle cx="256" cy="256" r="174" fill="none" stroke="#70ff9b" stroke-width="8" opacity=".22"/>
- <path d="M256 88 405 390h-64l-28-58H199l-28 58h-64L256 88Zm0 126-32 68h64l-32-68Z" fill="#70ff9b"/>
- <circle cx="256" cy="256" r="12" fill="#0b0b12"/>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17243f"/><stop offset="1" stop-color="#050713"/></linearGradient>
+ <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54f5ff"/><stop offset=".52" stop-color="#8b63ff"/><stop offset="1" stop-color="#ff45d5"/></linearGradient>
+ <linearGradient id="orbit" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#57f5ff"/><stop offset=".5" stop-color="#9b6dff"/><stop offset="1" stop-color="#ff55e5"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="512" height="512" rx="108" fill="url(#bg)"/>
+<circle cx="256" cy="226" r="150" fill="none" stroke="url(#neon)" stroke-width="14" opacity=".9" filter="url(#glow)"/>
+<path d="M128 354 224 142Q256 76 289 142L383 354H322L256 205 190 354Z" fill="none" stroke="url(#neon)" stroke-width="27" stroke-linejoin="round" filter="url(#glow)"/>
+<path d="M86 285C151 208 321 186 422 244 455 263 439 295 401 316 302 369 151 388 91 340 65 320 67 305 86 285Z" fill="none" stroke="url(#orbit)" stroke-width="12" filter="url(#glow)"/>
+<g fill="#8fefff"><circle cx="115" cy="151" r="3"/><circle cx="397" cy="140" r="2.5"/><circle cx="420" cy="350" r="3"/><circle cx="91" cy="370" r="2"/></g>
+<text x="256" y="448" text-anchor="middle" font-family="Arial,sans-serif" font-size="42" letter-spacing="4" fill="#d9e8ff">AURA V9</text>
 </svg>
