@@ -1,4 +1,4 @@
-const CACHE_NAME = "aura-v9-shell-v2";
+const CACHE_NAME = "aura-v9-shell-v3";
 const SHELL = ["/", "/intro.html", "/login.html", "/index.html", "/aura.webmanifest", "/aura-icon.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).catch(() => {}));
