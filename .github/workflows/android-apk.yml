@@ -1,6 +1,8 @@
 name: Build AURA V9 Android APK
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       api_url:
@@ -31,11 +33,11 @@ jobs:
 
       - name: Prepare Android web assets
         env:
-          AURA_API_URL: ${{ inputs.api_url }}
+          AURA_API_URL: ${{ inputs.api_url || 'https://aura-v9-2.onrender.com' }}
         run: node scripts/prepare-android.js
 
       - name: Install Capacitor build tools
-        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli
+        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli @capacitor-community/speech-recognition
 
       - name: Generate Android project
         run: npx cap add android
