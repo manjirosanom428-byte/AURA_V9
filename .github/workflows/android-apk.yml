@@ -42,6 +42,11 @@ jobs:
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Generate AURA V9 launcher icon
+        run: |
+          npm install --no-save sharp
+          node scripts/generate-android-icons.js
+
       - name: Sync Android project
         run: npx cap sync android
 
