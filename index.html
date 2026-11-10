@@ -1210,6 +1210,8 @@ footer {
             <button
                 class="kural"
                 id="kuralButton"
+                type="button"
+                aria-label="Start voice input"
             >
                 🎙️ Kural
             </button>
@@ -1701,21 +1703,20 @@ function getLastUserMessage() {
 }
 
 function speak(text) {
-
-    if (!("speechSynthesis" in window)) {
-        return;
+    if (!("speechSynthesis" in window) || !text) return;
+    try {
+        speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(String(text));
+        const selected = document.getElementById("voiceLanguage")?.value || "auto";
+        utterance.lang = selected === "auto" ? detectTextLanguage(text) : selected;
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+        utterance.onerror = error => console.warn("AURA speech playback:", error.error);
+        speechSynthesis.speak(utterance);
+    } catch (error) {
+        console.warn("AURA speech unavailable:", error);
     }
-
-    speechSynthesis.cancel();
-
-    const utterance =
-        new SpeechSynthesisUtterance(text);
-
-    utterance.lang = detectTextLanguage(text);
-    utterance.rate = 1;
-    utterance.pitch = 1;
-
-    speechSynthesis.speak(utterance);
 }
 
 function updateKuralButton(active) {
@@ -2070,14 +2071,15 @@ function toggleVoiceCall() {
         endVoiceCall();
         return;
     }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        addMessage("Better Call voice mode needs Chrome or another browser that supports Speech Recognition.", "aura");
+    const hasNativeSpeech = Boolean(window.Capacitor && window.AuraNativeSpeechRecognition);
+    const hasWebSpeech = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+    if (!hasNativeSpeech && !hasWebSpeech) {
+        addMessage("Better Call needs microphone permission and a supported speech-recognition browser. Open this HTTPS site in Chrome and allow Microphone.", "aura");
         return;
     }
     callMode = true;
     callBusy = false;
-    setVoiceCallUI(true, "Starting microphone...");
+    setVoiceCallUI(true, "Connecting to AURA voice mode...");
     startVoiceRecognition();
 }
 
