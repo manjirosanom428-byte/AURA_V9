@@ -4,6 +4,9 @@
 - PWA manifest + AURA V9 SVG icon.
 - Service worker static page cache; API requests offline cache pannaadhu.
 - AI backend supports a cloud OpenAI-compatible chat-completions API through server environment variables, with local Ollama fallback.
+- Browser-based Better Call two-way AI voice conversation prototype (Chrome/Web Speech API + microphone permission).
+- PDF text extraction and explanation; up to 80 pages / 18,000 characters, selectable-text PDFs only.
+- Video transcript helper: paste captions/transcript and ask AURA to explain or summarise.
 - Hollow Purple overlay exists in the chat UI; this is a visual effect, not a real AI model feature.
 
 ## Website deploy (phone browser)
@@ -29,4 +32,10 @@
 - Native background wake-word, contacts permission + call flow, confirmed call-connection detection, Quick Settings tile, and native call controls require native Android implementation and user-granted permissions. They are NOT implemented by this web/PWA update.
 
 ## Not yet complete
-Voice wake word/background listening; real contact lookup and call connection status; full two-way voice-call UI/language selector; image/video/music generation APIs and daily quota enforcement; Android Quick Settings tile; durable database and secure production sessions. These require provider choices, credentials where applicable, native code, and testing.
+Native Android APK and Android Studio/Capacitor project; always-on wake word/background listening; floating overlay; real contact lookup and confirmed telephone-call connection status; Android Quick Settings tile; OCR for scanned PDFs; automatic YouTube caption retrieval/video stream analysis; durable database and secure production sessions. These require native code or additional services, permissions, deployment configuration, and device testing.
+
+## Current feature limits
+- Better Call is an AI voice conversation in a supported browser, not a phone call. It needs HTTPS, microphone permission, and browser Speech Recognition support. Auto language selection is approximate.
+- PDF reader extracts selectable text locally in the browser; scanned/image-only PDFs need OCR. The extracted text is sent only after the user taps Ask AURA.
+- Video helper analyses transcript/captions that the user pastes; it does not automatically fetch YouTube captions.
+- Current login/API authorization and JSON-file storage are prototype-grade. Do not use sensitive data or publicly launch until secure sessions, authorization, rate limiting and durable database storage are implemented.
