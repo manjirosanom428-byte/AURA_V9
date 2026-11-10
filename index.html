@@ -1147,6 +1147,7 @@ footer {
         ></textarea>
 
 
+        <div id="voiceCallStatus" role="status" aria-live="polite" style="min-height:18px;margin-top:8px;color:#c9b5df;font-size:12px;text-align:right"></div>
         <div class="buttons">
 
             <select id="voiceLanguage" aria-label="Voice language" style="background:#241044;color:white;border:1px solid #a855f7;border-radius:10px;padding:10px;max-width:145px">
@@ -1158,6 +1159,14 @@ footer {
                 <option value="ml-IN">Malayalam</option>
                 <option value="kn-IN">Kannada</option>
             </select>
+            <button
+                class="kural"
+                id="voiceCallButton"
+                type="button"
+                onclick="toggleVoiceCall()"
+            >
+                📞 Better Call
+            </button>
             <button
                 class="kural"
                 id="kuralButton"
@@ -1808,6 +1817,147 @@ document
             startKuralListening();
         }
     );
+
+/* =========================
+   BETTER CALL - TWO-WAY AI VOICE
+========================= */
+let callMode = false;
+let callBusy = false;
+let callRecognition = null;
+
+function setVoiceCallUI(active, message) {
+    const button = document.getElementById("voiceCallButton");
+    if (button) {
+        button.textContent = active ? "⏹ End Call" : "📞 Better Call";
+        button.style.background = active ? "#ff5252" : "#70ff9b";
+        button.style.color = active ? "#ffffff" : "#07100a";
+    }
+    const info = document.getElementById("voiceCallStatus");
+    if (info) info.textContent = message || (active ? "AURA voice call active" : "");
+}
+
+function getVoiceLocale() {
+    const selected = document.getElementById("voiceLanguage")?.value || "auto";
+    return selected === "auto" ? detectTextLanguage(getLastUserMessage()) : selected;
+}
+
+function startVoiceRecognition() {
+    if (!callMode || callBusy) return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        addMessage("Voice conversation needs a browser with Speech Recognition support. Try Chrome.", "aura");
+        endVoiceCall();
+        return;
+    }
+    callRecognition = new SpeechRecognition();
+    callRecognition.lang = getVoiceLocale();
+    callRecognition.continuous = false;
+    callRecognition.interimResults = false;
+    callRecognition.onresult = async function(event) {
+        const spokenText = Array.from(event.results)
+            .filter(result => result.isFinal)
+            .map(result => result[0].transcript)
+            .join(" ").trim();
+        if (!spokenText || !callMode) return;
+        callBusy = true;
+        try { callRecognition.stop(); } catch (_) {}
+        addMessage(spokenText, "user");
+        setVoiceCallUI(true, "AURA is thinking...");
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: USER_ID, message: spokenText })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success || !data.reply) {
+                throw new Error(data.error || "AURA could not reply.");
+            }
+            addMessage(data.reply, "aura", new Date().toISOString());
+            if (!("speechSynthesis" in window)) {
+                setVoiceCallUI(true, "Reply shown in chat. Voice playback is unavailable.");
+                callBusy = false;
+                startVoiceRecognition();
+                return;
+            }
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(data.reply);
+            utterance.lang = detectTextLanguage(data.reply);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            utterance.onend = function() {
+                callBusy = false;
+                if (callMode) {
+                    setVoiceCallUI(true, "Listening...");
+                    startVoiceRecognition();
+                }
+            };
+            utterance.onerror = function() {
+                callBusy = false;
+                if (callMode) {
+                    setVoiceCallUI(true, "Voice playback issue. Listening...");
+                    startVoiceRecognition();
+                }
+            };
+            speechSynthesis.speak(utterance);
+        } catch (error) {
+            console.error("AURA voice call:", error);
+            addMessage("Voice connection failed: " + error.message, "aura");
+            callBusy = false;
+            if (callMode) {
+                setVoiceCallUI(true, "Listening...");
+                startVoiceRecognition();
+            }
+        }
+    };
+    callRecognition.onerror = function(event) {
+        if (!callMode) return;
+        if (event.error !== "no-speech" && event.error !== "aborted") {
+            setVoiceCallUI(true, "Microphone issue: " + event.error);
+        }
+    };
+    callRecognition.onend = function() {
+        if (callMode && !callBusy && !speechSynthesis.speaking) {
+            setTimeout(() => {
+                if (callMode && !callBusy) startVoiceRecognition();
+            }, 350);
+        }
+    };
+    try {
+        callRecognition.start();
+        setVoiceCallUI(true, "Listening...");
+    } catch (error) {
+        setVoiceCallUI(true, "Could not start microphone. Check browser permission.");
+    }
+}
+
+function toggleVoiceCall() {
+    if (callMode) {
+        endVoiceCall();
+        return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        addMessage("Better Call voice mode needs Chrome or another browser that supports Speech Recognition.", "aura");
+        return;
+    }
+    callMode = true;
+    callBusy = false;
+    setVoiceCallUI(true, "Starting microphone...");
+    startVoiceRecognition();
+}
+
+function endVoiceCall() {
+    callMode = false;
+    callBusy = false;
+    if (callRecognition) {
+        callRecognition.onend = null;
+        try { callRecognition.stop(); } catch (_) {}
+        callRecognition = null;
+    }
+    if ("speechSynthesis" in window) speechSynthesis.cancel();
+    setVoiceCallUI(false, "Call ended.");
+}
 
 /* =========================
    MUSIC
