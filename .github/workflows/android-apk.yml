@@ -37,15 +37,13 @@ jobs:
         run: node scripts/prepare-android.js
 
       - name: Install Capacitor build tools
-        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli @capacitor-community/speech-recognition
+        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli @capacitor-community/speech-recognition sharp
 
       - name: Generate Android project
         run: npx cap add android
 
       - name: Generate AURA V9 launcher icon
-        run: |
-          npm install --no-save sharp
-          node scripts/generate-android-icons.js
+        run: node scripts/generate-android-icons.js
 
       - name: Sync Android project
         run: npx cap sync android
