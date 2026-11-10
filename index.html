@@ -958,6 +958,18 @@ footer {
 @keyframes hpFloat{to{transform:translateY(-12px) scale(1.06)}}@keyframes hpPulse{to{filter:brightness(1.7);transform:scale(1.9)}}@keyframes hpFadeIn{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.hp-orb,.hp-purple{animation:none!important;transition:none!important}}
 
+
+/* AURA study tools */
+.tool-panel{width:min(900px,94%);margin:0 auto 14px;padding:16px;border:1px solid rgba(112,255,155,.28);border-radius:16px;background:rgba(8,18,18,.88);display:none}
+.tool-panel.active{display:block}
+.tool-panel h2{font-size:18px;color:#70ff9b;margin-bottom:10px}
+.tool-panel p{font-size:13px;color:#cbbbd9;line-height:1.5;margin:8px 0}
+.tool-panel input,.tool-panel textarea{width:100%;margin:8px 0;padding:11px;border:1px solid #34483b;border-radius:10px;background:#101820;color:#fff}
+.tool-panel textarea{min-height:130px;resize:vertical}
+.tool-panel button{border:1px solid #70ff9b;background:#14291d;color:#70ff9b;padding:9px 13px;border-radius:9px;margin:5px 5px 0 0}
+.tool-panel button:disabled{opacity:.5}
+.tool-panel .tool-status{font-size:12px;color:#70ff9b;min-height:18px}
+
 </style>
     <script src="https://js.puter.com/v2/"></script>
 <link rel="manifest" href="/aura.webmanifest">
@@ -1112,6 +1124,29 @@ footer {
 </div>
 
 
+<!-- PDF READER -->
+<section class="tool-panel" id="pdfPanel">
+  <h2>AURA PDF Reader</h2>
+  <p>Select a PDF from your device. AURA extracts its text in your browser; the document is sent to the AI only when you press “Ask AURA”.</p>
+  <input id="pdfFile" type="file" accept="application/pdf">
+  <div class="tool-status" id="pdfStatus" role="status"></div>
+  <textarea id="pdfText" placeholder="Extracted PDF text will appear here..." readonly></textarea>
+  <button type="button" id="askPdfButton" onclick="askAboutPdf()" disabled>Ask AURA about this PDF</button>
+  <button type="button" onclick="clearPdf()">Clear PDF</button>
+</section>
+
+<!-- VIDEO TRANSCRIPT HELPER -->
+<section class="tool-panel" id="videoPanel">
+  <h2>AURA Video Understanding</h2>
+  <p>Paste a YouTube link and its captions/transcript. AURA can then summarise, explain, translate, or answer questions about the supplied transcript. This does not secretly access private videos or fetch captions automatically.</p>
+  <input id="videoUrl" type="url" placeholder="Optional YouTube video link">
+  <textarea id="videoTranscript" placeholder="Paste the video's captions or transcript here..."></textarea>
+  <div class="tool-status" id="videoStatus" role="status"></div>
+  <button type="button" onclick="askAboutVideo()">Ask AURA about this video</button>
+  <button type="button" onclick="clearVideo()">Clear</button>
+</section>
+
+
 <!-- CHAT -->
 
 <section class="chat">
@@ -1174,6 +1209,8 @@ footer {
                 🎙️ Kural
             </button>
 
+            <button onclick="toggleToolPanel('pdfPanel')">📄 PDF Reader</button>
+            <button onclick="toggleToolPanel('videoPanel')">▶ Video / Transcript</button>
             <button onclick="musicMode()">
                 🎵 Music
             </button>
@@ -1199,6 +1236,7 @@ footer {
 </div>
 <script src="https://js.puter.com/v2/"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" referrerpolicy="no-referrer"></script>
 <script>
 const USER_ID = localStorage.getItem("auraUser");
 
@@ -1957,6 +1995,113 @@ function endVoiceCall() {
     }
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     setVoiceCallUI(false, "Call ended.");
+}
+
+
+/* PDF and user-provided video transcript tools */
+let auraPdfText = "";
+function toggleToolPanel(id) {
+  ["pdfPanel","videoPanel"].forEach(panelId => {
+    const panel=document.getElementById(panelId);
+    if(panel) panel.classList.toggle("active",panelId===id && !panel.classList.contains("active"));
+  });
+}
+function clearPdf() {
+  auraPdfText="";
+  document.getElementById("pdfFile").value="";
+  document.getElementById("pdfText").value="";
+  document.getElementById("pdfStatus").textContent="PDF cleared.";
+  document.getElementById("askPdfButton").disabled=true;
+}
+document.getElementById("pdfFile").addEventListener("change", async function(event) {
+  const file=event.target.files && event.target.files[0];
+  if(!file) return;
+  const status=document.getElementById("pdfStatus");
+  const askButton=document.getElementById("askPdfButton");
+  askButton.disabled=true;
+  auraPdfText="";
+  document.getElementById("pdfText").value="";
+  if(file.type!=="application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+    status.textContent="Please select a PDF file.";
+    return;
+  }
+  if(file.size>20*1024*1024) {
+    status.textContent="PDF is larger than 20 MB. Please choose a smaller file.";
+    return;
+  }
+  if(!window.pdfjsLib) {
+    status.textContent="PDF reader library could not load. Check your internet connection and try again.";
+    return;
+  }
+  try {
+    status.textContent="Reading PDF on this device...";
+    pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const bytes=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:bytes}).promise;
+    let pages=[];
+    for(let pageNo=1;pageNo<=Math.min(pdf.numPages,80);pageNo++) {
+      const page=await pdf.getPage(pageNo);
+      const content=await page.getTextContent();
+      const line=content.items.map(item=>item.str).join(" ");
+      pages.push("[Page "+pageNo+"]\n"+line);
+    }
+    auraPdfText=pages.join("\n\n").slice(0,18000);
+    document.getElementById("pdfText").value=auraPdfText;
+    askButton.disabled=!auraPdfText.trim();
+    status.textContent="Extracted text from "+Math.min(pdf.numPages,80)+" of "+pdf.numPages+" page(s). "+(pdf.numPages>80?"Only the first 80 pages were read.":"");
+  } catch(error) {
+    console.error("PDF read error:",error);
+    status.textContent="Could not read this PDF. It may be scanned or password-protected.";
+  }
+});
+async function askAURAWithContext(promptText) {
+  const message=String(promptText||"").trim();
+  if(!message) return;
+  addMessage(message,"user");
+  showThinking();
+  startHollowPurple();
+  try {
+    const response=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId:USER_ID,message})
+    });
+    const data=await response.json();
+    if(!response.ok || !data.success || !data.reply) throw new Error(data.error||"AURA could not answer.");
+    addMessage(data.reply,"aura",new Date().toISOString());
+    if(voiceEnabled) speak(data.reply);
+  } catch(error) {
+    console.error("Context question failed:",error);
+    addMessage("AURA connection failed: "+error.message,"aura");
+  } finally {
+    hideThinking();
+    stopHollowPurple();
+  }
+}
+function askAboutPdf() {
+  if(!auraPdfText.trim()) return;
+  askAURAWithContext("Please explain this PDF in the same language and writing style I use. Give a clear summary, important points, and answer based only on the supplied document. If something is missing, say so.\n\nPDF TEXT:\n"+auraPdfText);
+}
+function clearVideo() {
+  document.getElementById("videoUrl").value="";
+  document.getElementById("videoTranscript").value="";
+  document.getElementById("videoStatus").textContent="Video transcript cleared.";
+}
+function askAboutVideo() {
+  const url=document.getElementById("videoUrl").value.trim();
+  const transcript=document.getElementById("videoTranscript").value.trim();
+  const status=document.getElementById("videoStatus");
+  if(!transcript) {
+    status.textContent="Paste captions or a transcript first.";
+    return;
+  }
+  if(transcript.length>14000) {
+    status.textContent="Transcript is too long. Please keep it under 14,000 characters.";
+    return;
+  }
+  status.textContent="Sending the transcript you provided to AURA...";
+  askAURAWithContext("Analyse the following user-provided video transcript. Summarise the main ideas, explain difficult parts, and answer follow-up questions using only this transcript. Video link (not independently verified): "+(url||"Not provided")+"\n\nTRANSCRIPT:\n"+transcript);
+  status.textContent="Transcript sent to AURA.";
 }
 
 /* =========================
