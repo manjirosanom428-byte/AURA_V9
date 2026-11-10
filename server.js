@@ -4,12 +4,14 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
+const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const DATA_FILE = path.join(__dirname, "aura-data.json");
 
+app.use(cors({ origin: ["https://localhost", "capacitor://localhost"], credentials: true }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
 
