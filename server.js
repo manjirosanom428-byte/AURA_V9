@@ -13,7 +13,6 @@ const DATA_FILE = path.join(__dirname, "aura-data.json");
 
 app.use(cors({ origin: ["https://localhost", "capacitor://localhost"], credentials: true }));
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static(__dirname));
 
 let database = {
     users: {},
@@ -82,7 +81,11 @@ function getConversation(userId) {
 ========================================== */
 
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "intro.html"));
+    res.json({
+        success: true,
+        service: "AURA V9 API",
+        message: "AURA V9 Android app backend is online."
+    });
 });
 
 /* ==========================================
