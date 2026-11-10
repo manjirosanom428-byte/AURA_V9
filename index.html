@@ -1634,11 +1634,11 @@ let listening = false;
 // latest text/script; users can choose a language manually before speaking.
 function detectTextLanguage(text) {
     const value = String(text || "");
-    if (/[\\u0B80-\\u0BFF]/.test(value)) return "ta-IN";
-    if (/[\\u0900-\\u097F]/.test(value)) return "hi-IN";
-    if (/[\\u0C00-\\u0C7F]/.test(value)) return "te-IN";
-    if (/[\\u0D00-\\u0D7F]/.test(value)) return "ml-IN";
-    if (/[\\u0C80-\\u0CFF]/.test(value)) return "kn-IN";
+    if (/[\u0B80-\u0BFF]/.test(value)) return "ta-IN";
+    if (/[\u0900-\u097F]/.test(value)) return "hi-IN";
+    if (/[\u0C00-\u0C7F]/.test(value)) return "te-IN";
+    if (/[\u0D00-\u0D7F]/.test(value)) return "ml-IN";
+    if (/[\u0C80-\u0CFF]/.test(value)) return "kn-IN";
     return "en-IN";
 }
 
