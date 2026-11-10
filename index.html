@@ -3,6 +3,10 @@
 
 <head>
 <script src="https://js.puter.com/v2/"></script>
+<script type="module">
+  import { SpeechRecognition } from "https://esm.sh/@capacitor-community/speech-recognition";
+  window.AuraNativeSpeechRecognition = SpeechRecognition;
+</script>
 <meta charset="UTF-8">
 
 <meta
@@ -1384,6 +1388,9 @@ async function loadHistory() {
 ========================= */
 
 async function newChat() {
+    // A tap on New Chat is a user gesture; start the greeting before the network await.
+    voiceEnabled = true;
+    speak("Vanakkam!");
     try {
         const response = await fetch(
             "/api/new-chat",
@@ -1414,8 +1421,6 @@ async function newChat() {
                 <p>New AURA conversation started.</p>
             </div>
         `;
-
-        speak("Vanakkam!");
 
     } catch (error) {
         console.error("New chat error:", error);
@@ -1673,7 +1678,7 @@ async function puterChat(message) {
    VOICE
 ========================= */
 
-let voiceEnabled = false;
+let voiceEnabled = true;
 let recognition = null;
 let listening = false;
 
@@ -1747,18 +1752,41 @@ function updateKuralButton(active) {
     }
 }
 
-function startKuralListening() {
+async function startKuralListening() {
+
+    const NativeSpeech = window.AuraNativeSpeechRecognition;
+    if (window.Capacitor && NativeSpeech) {
+        try {
+            const permission = await NativeSpeech.requestPermissions();
+            if (permission.speechRecognition !== "granted") {
+                alert("Please allow microphone and speech recognition permission for AURA V9.");
+                return;
+            }
+            listening = true;
+            updateKuralButton(true);
+            const languageChoice = document.getElementById("voiceLanguage")?.value || "auto";
+            const language = languageChoice === "auto"
+                ? detectTextLanguage(document.getElementById("prompt").value || getLastUserMessage())
+                : languageChoice;
+            const result = await NativeSpeech.start({ language, maxResults: 1, partialResults: false, popup: false });
+            const transcript = result && result.matches && result.matches[0];
+            if (transcript) document.getElementById("prompt").value = transcript;
+        } catch (error) {
+            console.error("Native Kural error:", error);
+            alert("AURA voice input failed. Check microphone permission and try again.");
+        } finally {
+            listening = false;
+            updateKuralButton(false);
+        }
+        return;
+    }
 
     const SpeechRecognition =
         window.SpeechRecognition ||
         window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-
-        alert(
-            "Voice input is not supported. Please use Chrome."
-        );
-
+        alert("Voice input is unavailable in this browser. Open AURA V9 in Chrome or install the updated Android app.");
         return;
     }
 
