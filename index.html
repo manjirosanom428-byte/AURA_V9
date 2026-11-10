@@ -1149,6 +1149,15 @@ footer {
 
         <div class="buttons">
 
+            <select id="voiceLanguage" aria-label="Voice language" style="background:#241044;color:white;border:1px solid #a855f7;border-radius:10px;padding:10px;max-width:145px">
+                <option value="auto">Auto language</option>
+                <option value="ta-IN">Tamil</option>
+                <option value="en-IN">English</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="te-IN">Telugu</option>
+                <option value="ml-IN">Malayalam</option>
+                <option value="kn-IN">Kannada</option>
+            </select>
             <button
                 class="kural"
                 id="kuralButton"
@@ -1621,6 +1630,23 @@ let voiceEnabled = false;
 let recognition = null;
 let listening = false;
 
+// Web Speech Recognition requires a locale. Auto mode selects one from the
+// latest text/script; users can choose a language manually before speaking.
+function detectTextLanguage(text) {
+    const value = String(text || "");
+    if (/[\\u0B80-\\u0BFF]/.test(value)) return "ta-IN";
+    if (/[\\u0900-\\u097F]/.test(value)) return "hi-IN";
+    if (/[\\u0C00-\\u0C7F]/.test(value)) return "te-IN";
+    if (/[\\u0D00-\\u0D7F]/.test(value)) return "ml-IN";
+    if (/[\\u0C80-\\u0CFF]/.test(value)) return "kn-IN";
+    return "en-IN";
+}
+
+function getLastUserMessage() {
+    const userMessages = document.querySelectorAll("#messages .message.user");
+    return userMessages.length ? userMessages[userMessages.length - 1].textContent : "";
+}
+
 function speak(text) {
 
     if (!("speechSynthesis" in window)) {
@@ -1632,6 +1658,7 @@ function speak(text) {
     const utterance =
         new SpeechSynthesisUtterance(text);
 
+    utterance.lang = detectTextLanguage(text);
     utterance.rate = 1;
     utterance.pitch = 1;
 
@@ -1698,7 +1725,10 @@ function startKuralListening() {
     recognition =
         new SpeechRecognition();
 
-    recognition.lang = "en-IN";
+    const languageChoice = document.getElementById("voiceLanguage")?.value || "auto";
+    recognition.lang = languageChoice === "auto"
+        ? detectTextLanguage(document.getElementById("prompt").value || getLastUserMessage())
+        : languageChoice;
     recognition.continuous = false;
     recognition.interimResults = true;
 
