@@ -1931,7 +1931,7 @@ async function getVoiceReply(message) {
     }
 }
 
-async async function startNativeVoiceRecognition() {
+async function startNativeVoiceRecognition() {
     if (!callMode || callBusy) return;
     const NativeSpeech = window.AuraNativeSpeechRecognition;
     callBusy = true;
