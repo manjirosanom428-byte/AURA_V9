@@ -31,6 +31,11 @@ const config = `(function () {
 
 fs.writeFileSync(path.join(webDir, "aura-config.js"), config, "utf8");
 
+// Ship PDF.js locally: Android WebView may not reliably load third-party CDN scripts.
+const pdfJsSource = path.join(root, "node_modules", "pdfjs-dist", "build", "pdf.min.js");
+if (!fs.existsSync(pdfJsSource)) throw new Error("PDF.js dependency is missing; install pdfjs-dist before preparing Android assets.");
+fs.copyFileSync(pdfJsSource, path.join(webDir, "pdf.min.js"));
+
 for (const file of ["index.html", "login.html", "intro.html"]) {
   const target = path.join(webDir, file);
   let html = fs.readFileSync(target, "utf8");
