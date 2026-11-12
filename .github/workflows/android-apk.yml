@@ -37,7 +37,9 @@ jobs:
         run: node scripts/prepare-android.js
 
       - name: Install Capacitor build tools
-        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli @capacitor-community/speech-recognition sharp
+        run: npm install --no-save @capacitor/core @capacitor/android @capacitor/cli @capacitor-community/speech-recognition pdfjs-dist@3.11.174 esbuild sharp
+      - name: Bundle native Android speech bridge
+        run: npx esbuild scripts/android-native.js --bundle --platform=browser --format=iife --outfile=www/aura-native.js
 
       - name: Generate Android project
         run: npx cap add android
