@@ -1243,11 +1243,12 @@ footer {
 </div>
 <script src="https://js.puter.com/v2/"></script>
 
+<script src="./auth-client.js"></script>
 <script src="./pdf.min.js"></script>
 <script>
 const USER_ID = localStorage.getItem("auraUser");
 
-if (!USER_ID) {
+if (!USER_ID || !localStorage.getItem("auraToken")) {
     window.location.href = "/login.html";
 }
 
@@ -2312,13 +2313,10 @@ function closeMusicMode() {
 ========================= */
 
 function logout() {
-
-    localStorage.removeItem(
-        "auraUser"
-    );
-
-    window.location.href =
-        "/login.html";
+    fetch("/api/logout", { method: "POST" }).catch(() => {});
+    localStorage.removeItem("auraUser");
+    localStorage.removeItem("auraToken");
+    window.location.href = "/login.html";
 }
 
 /* =========================
