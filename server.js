@@ -3,13 +3,19 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const DATA_FILE = path.join(__dirname, "aura-data.json");
+const DATA_DIR = process.env.AURA_DATA_DIR || __dirname;
+fs.mkdirSync(DATA_DIR, { recursive: true });
+const DATA_FILE = path.join(DATA_DIR, "aura-data.json");
+const sessions = new Map();
+const requestBuckets = new Map();
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 app.use(cors({ origin: ["https://localhost", "capacitor://localhost"], credentials: true }));
 app.use(express.json({ limit: "10mb" }));
@@ -46,14 +52,15 @@ function loadDatabase() {
 }
 
 function saveDatabase() {
+    const temporaryFile = DATA_FILE + ".tmp";
     try {
-        fs.writeFileSync(
-            DATA_FILE,
-            JSON.stringify(database, null, 2),
-            "utf8"
-        );
+        fs.writeFileSync(temporaryFile, JSON.stringify(database, null, 2), "utf8");
+        fs.renameSync(temporaryFile, DATA_FILE);
+        return true;
     } catch (error) {
         console.error("Database save error:", error);
+        try { if (fs.existsSync(temporaryFile)) fs.unlinkSync(temporaryFile); } catch (_) {}
+        return false;
     }
 }
 
@@ -93,17 +100,42 @@ app.get("/", (req, res) => {
 ========================================== */
 
 app.get("/api/test", (req, res) => {
-    res.json({
-        success: true,
-        message: "AURA V9 API is working!"
-    });
+    res.json({ success: true, message: "AURA V9 API is working!" });
 });
+
+function rateLimit(bucket, limit, windowMs) {
+    return (req, res, next) => {
+        const key = bucket + ":" + (req.ip || req.socket.remoteAddress || "unknown");
+        const now = Date.now();
+        const current = requestBuckets.get(key);
+        if (!current || now - current.startedAt >= windowMs) {
+            requestBuckets.set(key, { startedAt: now, count: 1 });
+            return next();
+        }
+        current.count += 1;
+        if (current.count > limit) return res.status(429).json({ success: false, error: "Too many attempts. Please wait and try again." });
+        next();
+    };
+}
+
+function requireSession(req, res, next) {
+    const authorization = String(req.headers.authorization || "");
+    const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+    const session = token ? sessions.get(token) : null;
+    if (!session || session.expiresAt <= Date.now()) {
+        if (token) sessions.delete(token);
+        return res.status(401).json({ success: false, error: "Session expired. Please login again." });
+    }
+    req.authUserId = session.userId;
+    next();
+}
+
 
 /* ==========================================
    REGISTER
 ========================================== */
 
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", rateLimit("register", 8, 15 * 60 * 1000), async (req, res) => {
     try {
         const username =
             String(req.body.username || "").trim();
@@ -125,11 +157,11 @@ app.post("/api/register", async (req, res) => {
             });
         }
 
-        if (password.length < 4) {
-            return res.status(400).json({
-                success: false,
-                error: "Password must be at least 4 characters."
-            });
+        if (password.length < 8) {
+            return res.status(400).json({ success: false, error: "Password must be at least 8 characters." });
+        }
+        if (password.length > 128) {
+            return res.status(400).json({ success: false, error: "Password is too long." });
         }
 
         if (userExists(username)) {
@@ -150,7 +182,11 @@ app.post("/api/register", async (req, res) => {
 
         database.conversations[username] = [];
 
-        saveDatabase();
+        if (!saveDatabase()) {
+            delete database.users[username];
+            delete database.conversations[username];
+            return res.status(500).json({ success: false, error: "Could not save your account. Please try again." });
+        }
 
         res.json({
             success: true,
@@ -172,7 +208,7 @@ app.post("/api/register", async (req, res) => {
    LOGIN
 ========================================== */
 
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", rateLimit("login", 10, 15 * 60 * 1000), async (req, res) => {
     try {
         const username =
             String(req.body.username || "").trim();
@@ -202,10 +238,9 @@ app.post("/api/login", async (req, res) => {
             });
         }
 
-        res.json({
-            success: true,
-            username: user.username
-        });
+        const token = crypto.randomBytes(32).toString("hex");
+        sessions.set(token, { userId: user.username, expiresAt: Date.now() + SESSION_TTL_MS });
+        res.json({ success: true, username: user.username, token });
 
     } catch (error) {
         console.error("Login error:", error);
@@ -217,13 +252,23 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+app.post("/api/logout", requireSession, (req, res) => {
+    const token = String(req.headers.authorization || "").slice(7);
+    sessions.delete(token);
+    res.json({ success: true });
+});
+
+app.use("/api", (req, res, next) => {
+    if (req.path === "/register" || req.path === "/login" || req.path === "/test") return next();
+    return requireSession(req, res, next);
+});
+
 /* ==========================================
    PROFILE
 ========================================== */
 
 app.get("/api/profile", (req, res) => {
-    const userId =
-        String(req.query.userId || "").trim();
+    const userId = req.authUserId;
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
@@ -248,8 +293,7 @@ app.get("/api/profile", (req, res) => {
 ========================================== */
 
 app.get("/api/history", (req, res) => {
-    const userId =
-        String(req.query.userId || "").trim();
+    const userId = req.authUserId;
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
@@ -269,8 +313,7 @@ app.get("/api/history", (req, res) => {
 ========================================== */
 
 app.post("/api/new-chat", (req, res) => {
-    const userId =
-        String(req.body.userId || "").trim();
+    const userId = req.authUserId;
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
@@ -294,8 +337,7 @@ app.post("/api/new-chat", (req, res) => {
 ========================================== */
 
 app.delete("/api/history", (req, res) => {
-    const userId =
-        String(req.body.userId || "").trim();
+    const userId = req.authUserId;
 
     if (!userId || !userExists(userId)) {
         return res.status(404).json({
@@ -320,8 +362,7 @@ app.delete("/api/history", (req, res) => {
 
 app.post("/api/chat", async (req, res) => {
     try {
-        const userId =
-            String(req.body.userId || "").trim();
+        const userId = req.authUserId;
 
         const message =
             String(req.body.message || "").trim();
