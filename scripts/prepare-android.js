@@ -12,7 +12,7 @@ if (!backendUrl || !/^https:\/\//i.test(backendUrl)) {
 fs.rmSync(webDir, { recursive: true, force: true });
 fs.mkdirSync(webDir, { recursive: true });
 
-for (const file of ["index.html", "login.html", "intro.html", "aura-icon.svg", "aura.webmanifest", "service-worker.js"]) {
+for (const file of ["index.html", "login.html", "intro.html", "aura-icon.svg", "auth-client.js"]) {
   fs.copyFileSync(path.join(root, file), path.join(webDir, file));
 }
 
@@ -44,11 +44,5 @@ for (const file of ["index.html", "login.html", "intro.html"]) {
   }
   fs.writeFileSync(target, html, "utf8");
 }
-
-const manifestPath = path.join(webDir, "aura.webmanifest");
-const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-manifest.start_url = "./intro.html";
-manifest.scope = "./";
-fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
 console.log("Prepared local AURA V9 web assets for Android. API endpoint:", backendUrl);
