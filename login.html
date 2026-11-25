@@ -224,6 +224,7 @@ button:hover {
 </div>
 
 
+<script src="./auth-client.js"></script>
 <script>
 
 function showMessage(text, success = false) {
@@ -306,11 +307,11 @@ async function register() {
             .value;
 
     if (!username || !password) {
-
-        showMessage(
-            "Please enter username and password."
-        );
-
+        showMessage("Please enter username and password.");
+        return;
+    }
+    if (password.length < 8) {
+        showMessage("Use at least 8 characters for your password.");
         return;
     }
 
@@ -428,10 +429,8 @@ async function login() {
 
         if (data.success) {
 
-            localStorage.setItem(
-                "auraUser",
-                data.username
-            );
+            localStorage.setItem("auraUser", data.username);
+            localStorage.setItem("auraToken", data.token);
 
             showMessage(
                 `Welcome ${data.username}!`,
